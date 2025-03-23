@@ -1,6 +1,6 @@
 package Empleados;
 
-import Conexion.ConexionBD;
+import Conexion.ConexionDB;
 
 import javax.swing.*;
 import java.sql.Connection;
@@ -9,11 +9,11 @@ import java.sql.SQLException;
 
 public class EmpleadosDAO
 {
-    private ConexionBD conexionBD = new ConexionBD();
+    private ConexionDB conexionDB = new ConexionDB();
 
     public void agregar(Empleados empleados)
     {
-        Connection con = conexionBD.getConnection();
+        Connection con = conexionDB.getConnection();
 
         String query = "INSERT INTO empleados (nombre, cargo, salario) VALUES (?,?,?)";
 
@@ -46,7 +46,7 @@ public class EmpleadosDAO
 
     public void eliminar(int id_empleado)
     {
-        Connection con = conexionBD.getConnection();
+        Connection con = conexionDB.getConnection();
 
         String query = "DELETE FROM empleados WHERE id_empleado=?";
 
@@ -76,7 +76,7 @@ public class EmpleadosDAO
 
     public void actualizar(Empleados empleados)
     {
-        Connection con = conexionBD.getConnection();
+        Connection con = conexionDB.getConnection();
         String query = "UPDATE empleados SET nombre = ?, cargo = ?, salario = ? WHERE id_empleado = ?";
 
         try
