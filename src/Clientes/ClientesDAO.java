@@ -37,7 +37,36 @@ public class ClientesDAO {
         {
             e.printStackTrace();
         }
+    }
+
+    public void eliminar(int id_cliente)
+    {
+        Connection con = conexionDB.getConnection();
+
+        String query = "DELETE FROM clientes WHERE id_cliente = ?";
+
+        try
+        {
+            PreparedStatement pst = con.prepareStatement(query);
+            pst.setInt(1,id_cliente);
+
+            int resultado = pst.executeUpdate();
+
+            if(resultado>0)
+            {
+                JOptionPane.showMessageDialog(null,"Cliente eliminado exitosamente");
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null,"Cliente no eliminado");
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
 
 
     }
+
 }
