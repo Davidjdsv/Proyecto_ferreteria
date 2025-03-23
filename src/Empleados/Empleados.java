@@ -1,5 +1,5 @@
 package Empleados;
-//contructor empleados y sus atributos
+//contructor empleados y sus atributos con nombre , cargo , salario
 
 public class Empleados
 {
