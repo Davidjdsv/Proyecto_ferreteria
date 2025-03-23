@@ -1,4 +1,5 @@
 package Empleados;
+//contructor empleados y sus atributos
 
 public class Empleados
 {
