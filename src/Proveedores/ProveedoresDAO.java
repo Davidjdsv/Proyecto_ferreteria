@@ -43,4 +43,22 @@ public class ProveedoresDAO {
             e.printStackTrace();
         }
     }
+
+    public void actualizar(Proveedores proveedores){
+        Connection con = conexionDB.getConnection();
+        String query = "UPDATE proveedores SET nombre = ?, contacto = ?, categoria_producto = ? WHERE id_proveedor = ?";
+
+        try {
+            PreparedStatement pst = con.prepareStatement(query);
+            pst.setString(1, proveedores.getNombre());
+            pst.setString(2, proveedores.getContacto());
+            pst.setString(3, proveedores.getCategoria_producto());
+            pst.setInt(4, proveedores.getId_proveedor());
+
+            int resultado = pst.executeUpdate();
+            String mensaje = resultado > 0 ? "Cliente actualizado con éxito!" : "Ups! Ocurrió un error al actualizar al proveedor";
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
 }
