@@ -68,5 +68,37 @@ public class ClientesDAO {
 
 
     }
+    public void actualizar(Clientes clientes)
+    {
+        Connection con = conexionDB.getConnection();
+        String query = "UPDATE clientes set nombre = ?,telefono = ?,direccion = ?,correo = ? WHERE id_cliente = ?";
+
+        try
+        {
+            PreparedStatement pst = con.prepareStatement(query);
+            pst.setString(1, clientes.getNombre());
+            pst.setString(2, clientes.getTelefono());
+            pst.setString(3, clientes.getDireccion()); // Corregido (antes faltaba)
+            pst.setString(4, clientes.getCorreo());
+            pst.setInt(5,clientes.getId_cliente());
+
+            int resultado = pst.executeUpdate();
+
+            if (resultado>0)
+            {
+                JOptionPane.showMessageDialog(null,"Cliente actualizado exitosamente");
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null,"cliente no actualizado");
+            }
+        }
+
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
 
 }
