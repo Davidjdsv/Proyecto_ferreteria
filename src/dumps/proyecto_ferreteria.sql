@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 24-03-2025 a las 21:34:14
+-- Tiempo de generación: 22-03-2025 a las 01:54:23
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -29,10 +29,10 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `clientes` (
   `id_cliente` int(11) NOT NULL,
-  `nombre` varchar(50) NOT NULL,
-  `telefono` varchar(50) NOT NULL,
-  `direccion` varchar(50) NOT NULL,
-  `correo` varchar(50) NOT NULL
+  `nombre` varchar(100) NOT NULL,
+  `telefono` varchar(20) DEFAULT NULL,
+  `direccion` varchar(80) DEFAULT NULL,
+  `correo` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -43,39 +43,24 @@ CREATE TABLE `clientes` (
 
 CREATE TABLE `empleados` (
   `id_empleado` int(11) NOT NULL,
-  `nombre` varchar(50) NOT NULL,
-  `cargo` enum('admin','vendedor') NOT NULL,
-  `salario` float(8,2) NOT NULL
+  `nombre` varchar(100) NOT NULL,
+  `cargo` varchar(50) DEFAULT NULL,
+  `salario` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `inventario_productos`
+-- Estructura de tabla para la tabla `inventario`
 --
 
-CREATE TABLE `inventario_productos` (
-  `id_producto` int(11) NOT NULL,
-  `nombre_producto` varchar(50) NOT NULL,
-  `categoria` varchar(50) NOT NULL,
-  `cantidad_stock` int(11) NOT NULL,
-  `precio_producto` int(11) NOT NULL,
-  `id_proveedor_asociado` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `ordenes_compra`
---
-
-CREATE TABLE `ordenes_compra` (
-  `id_orden_compra` int(11) NOT NULL,
-  `id_cliente` int(11) NOT NULL,
-  `id_empleado` int(11) NOT NULL,
-  `id_producto` int(11) NOT NULL,
-  `estado_orden` enum('pendiente','pagada','enviada') NOT NULL,
-  `fecha_compra` timestamp NOT NULL DEFAULT current_timestamp()
+CREATE TABLE `inventario` (
+  `id_inventario` int(11) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `categoria` varchar(50) DEFAULT NULL,
+  `precio` decimal(10,2) NOT NULL,
+  `cantidad_disponible` int(11) NOT NULL,
+  `id_proveedor` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -86,21 +71,8 @@ CREATE TABLE `ordenes_compra` (
 
 CREATE TABLE `proveedores` (
   `id_proveedor` int(11) NOT NULL,
-  `nombre` varchar(50) NOT NULL,
-  `contacto` varchar(50) NOT NULL,
-  `categoria_producto` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `registro_ventas`
---
-
-CREATE TABLE `registro_ventas` (
-  `id_venta` int(11) NOT NULL,
-  `id_orden_compra` int(11) NOT NULL,
-  `total` int(11) NOT NULL
+  `nombre` varchar(100) NOT NULL,
+  `contacto` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -111,7 +83,8 @@ CREATE TABLE `registro_ventas` (
 -- Indices de la tabla `clientes`
 --
 ALTER TABLE `clientes`
-  ADD PRIMARY KEY (`id_cliente`);
+  ADD PRIMARY KEY (`id_cliente`),
+  ADD UNIQUE KEY `correo` (`correo`);
 
 --
 -- Indices de la tabla `empleados`
@@ -120,33 +93,17 @@ ALTER TABLE `empleados`
   ADD PRIMARY KEY (`id_empleado`);
 
 --
--- Indices de la tabla `inventario_productos`
+-- Indices de la tabla `inventario`
 --
-ALTER TABLE `inventario_productos`
-  ADD PRIMARY KEY (`id_producto`),
-  ADD KEY `id_proveedor_asociado` (`id_proveedor_asociado`);
-
---
--- Indices de la tabla `ordenes_compra`
---
-ALTER TABLE `ordenes_compra`
-  ADD PRIMARY KEY (`id_orden_compra`),
-  ADD KEY `id_cliente` (`id_cliente`),
-  ADD KEY `id_empleado` (`id_empleado`),
-  ADD KEY `id_producto` (`id_producto`);
+ALTER TABLE `inventario`
+  ADD PRIMARY KEY (`id_inventario`),
+  ADD KEY `id_proveedor` (`id_proveedor`);
 
 --
 -- Indices de la tabla `proveedores`
 --
 ALTER TABLE `proveedores`
   ADD PRIMARY KEY (`id_proveedor`);
-
---
--- Indices de la tabla `registro_ventas`
---
-ALTER TABLE `registro_ventas`
-  ADD PRIMARY KEY (`id_venta`),
-  ADD KEY `id_orden_compra` (`id_orden_compra`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -165,16 +122,10 @@ ALTER TABLE `empleados`
   MODIFY `id_empleado` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de la tabla `inventario_productos`
+-- AUTO_INCREMENT de la tabla `inventario`
 --
-ALTER TABLE `inventario_productos`
-  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `ordenes_compra`
---
-ALTER TABLE `ordenes_compra`
-  MODIFY `id_orden_compra` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `inventario`
+  MODIFY `id_inventario` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `proveedores`
@@ -183,34 +134,14 @@ ALTER TABLE `proveedores`
   MODIFY `id_proveedor` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de la tabla `registro_ventas`
---
-ALTER TABLE `registro_ventas`
-  MODIFY `id_venta` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- Restricciones para tablas volcadas
 --
 
 --
--- Filtros para la tabla `inventario_productos`
+-- Filtros para la tabla `inventario`
 --
-ALTER TABLE `inventario_productos`
-  ADD CONSTRAINT `inventario_productos_ibfk_1` FOREIGN KEY (`id_proveedor_asociado`) REFERENCES `proveedores` (`id_proveedor`) ON DELETE SET NULL ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `ordenes_compra`
---
-ALTER TABLE `ordenes_compra`
-  ADD CONSTRAINT `ordenes_compra_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `ordenes_compra_ibfk_2` FOREIGN KEY (`id_empleado`) REFERENCES `empleados` (`id_empleado`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `ordenes_compra_ibfk_3` FOREIGN KEY (`id_producto`) REFERENCES `inventario_productos` (`id_producto`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `registro_ventas`
---
-ALTER TABLE `registro_ventas`
-  ADD CONSTRAINT `registro_ventas_ibfk_1` FOREIGN KEY (`id_orden_compra`) REFERENCES `ordenes_compra` (`id_orden_compra`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `inventario`
+  ADD CONSTRAINT `inventario_ibfk_1` FOREIGN KEY (`id_proveedor`) REFERENCES `proveedores` (`id_proveedor`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
