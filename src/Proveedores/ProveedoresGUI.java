@@ -43,6 +43,16 @@ public class ProveedoresGUI {
                 proveedoresDAO.actualizar(proveedores);
             }
         });
+
+
+        EliminarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int id_proveedor = Integer.parseInt(id_proveedorTextField.getText());
+
+                proveedoresDAO.eliminar(id_proveedor);
+            }
+        });
     }
 
 
