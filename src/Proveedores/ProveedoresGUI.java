@@ -29,6 +29,22 @@ public class ProveedoresGUI {
                 proveedoresDAO.agregar(proveedores);
             }
         });
+
+        //TODO: Botón de actualizar
+        actualizarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String nombre = nombreTextField.getText();
+                String contacto = contactoTextField.getText();
+                String categoria_producto = categoria_productoTextField.getText();
+                int id_proveedor = Integer.parseInt(id_proveedorTextField.getText());
+
+                Proveedores proveedores = new Proveedores(id_proveedor, nombre, contacto, categoria_producto);
+                proveedoresDAO.actualizar(proveedores);
+            }
+        });
     }
+
+
 
 }
