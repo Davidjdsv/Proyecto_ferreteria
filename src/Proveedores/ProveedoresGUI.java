@@ -75,6 +75,12 @@ public class ProveedoresGUI {
         });
     }
 
+    public void limpiar(){
+        nombreTextField.setText("");
+        contactoTextField.setText("");
+        categoria_productoTextField.setText("");
+    }
+
 
 
 }
