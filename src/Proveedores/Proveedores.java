@@ -6,7 +6,7 @@ public class Proveedores {
     String contacto;
     String categoria_producto;
 
-    public Proveedores(int id_proveedor, String contacto, String nombre, String categoria_producto) {
+    public Proveedores(int id_proveedor, String nombre, String contacto, String categoria_producto) {
         this.id_proveedor = id_proveedor;
         this.contacto = contacto;
         this.nombre = nombre;
