@@ -22,12 +22,15 @@ public class ProveedoresGUI {
     private JButton agregarButton;
     private JButton EliminarButton;
     private JButton actualizarButton;
+    private JPanel main;
     int filas = 0;
 
     ProveedoresDAO proveedoresDAO = new ProveedoresDAO();
 
     //TODO: Botón agregar
     public ProveedoresGUI() {
+        id_proveedorTextField.setEnabled(false);
+        obtenerDatos();
         agregarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -37,6 +40,8 @@ public class ProveedoresGUI {
 
                 Proveedores proveedores = new Proveedores(0, nombre, contacto, categoria_producto);
                 proveedoresDAO.agregar(proveedores);
+                obtenerDatos();
+                limpiar();
             }
         });
 
@@ -51,6 +56,8 @@ public class ProveedoresGUI {
 
                 Proveedores proveedores = new Proveedores(id_proveedor, nombre, contacto, categoria_producto);
                 proveedoresDAO.actualizar(proveedores);
+                obtenerDatos();
+                limpiar();
             }
         });
 
@@ -61,6 +68,8 @@ public class ProveedoresGUI {
                 int id_proveedor = Integer.parseInt(id_proveedorTextField.getText());
 
                 proveedoresDAO.eliminar(id_proveedor);
+                obtenerDatos();
+                limpiar();
             }
         });
 
@@ -71,10 +80,11 @@ public class ProveedoresGUI {
                 super.mouseClicked(e);
                 int selectFila = table1.getSelectedRow();
 
-                if(selectFila > 0){
-                    nombreTextField.setText((String) table1.getValueAt(selectFila, 0));
-                    contactoTextField.setText((String) table1.getValueAt(selectFila, 1));
-                    categoria_productoTextField.setText((String) table1.getValueAt(selectFila, 2));
+                if(selectFila >= 0){
+                    id_proveedorTextField.setText((String) table1.getValueAt(selectFila, 0));
+                    nombreTextField.setText((String) table1.getValueAt(selectFila, 1));
+                    contactoTextField.setText((String) table1.getValueAt(selectFila, 2));
+                    categoria_productoTextField.setText((String) table1.getValueAt(selectFila, 3));
 
                     filas = selectFila;
                 }
@@ -83,6 +93,7 @@ public class ProveedoresGUI {
     }
 
     public void limpiar(){
+        id_proveedorTextField.setText("");
         nombreTextField.setText("");
         contactoTextField.setText("");
         categoria_productoTextField.setText("");
@@ -95,10 +106,11 @@ public class ProveedoresGUI {
 
         dtm.addColumn("Id_proveedor");
         dtm.addColumn("Nombre");
-        dtm.addColumn("Categoría producto");
+        dtm.addColumn("Contacto");
+        dtm.addColumn("Categoría_producto");
 
         table1.setModel(dtm);
-        String[] dato = new String[3];
+        String[] dato = new String[4];
         Connection con = conexionDB.getConnection();
 
         try {
@@ -110,6 +122,7 @@ public class ProveedoresGUI {
                 dato[0] = rs.getString(1);
                 dato[1] = rs.getString(2);
                 dato[2] = rs.getString(3);
+                dato[3] = rs.getString(4);
                 dtm.addRow(dato);
             }
         } catch (SQLException e){
@@ -117,6 +130,14 @@ public class ProveedoresGUI {
         }
     }
 
-
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Gestión de proveedores");
+        frame.setContentPane(new ProveedoresGUI().main);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setVisible(true);
+        frame.setSize(700, 700);
+        frame.setResizable(false);
+    }
 
 }

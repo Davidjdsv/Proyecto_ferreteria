@@ -12,7 +12,7 @@ public class ProveedoresDAO {
 
     public void agregar(Proveedores proveedores){
         Connection con = conexionDB.getConnection();
-        String query = "INSERT INTO proveedores (nombre, contaco, categoria_producto) VALUES (?, ?, ?)";
+        String query = "INSERT INTO proveedores (nombre, contacto, categoria_producto) VALUES (?, ?, ?)";
 
         try{
             PreparedStatement pst = con.prepareStatement(query);
@@ -30,7 +30,7 @@ public class ProveedoresDAO {
 
     public void eliminar(int id_proveedor){
         Connection con = conexionDB.getConnection();
-        String query = "DELETE proveedores WHERE id_proveedor = ?";
+        String query = "DELETE FROM proveedores WHERE id_proveedor = ?";
 
         try {
             PreparedStatement pst = con.prepareStatement(query);
@@ -57,6 +57,7 @@ public class ProveedoresDAO {
 
             int resultado = pst.executeUpdate();
             String mensaje = resultado > 0 ? "Cliente actualizado con éxito!" : "Ups! Ocurrió un error al actualizar al proveedor";
+            JOptionPane.showMessageDialog(null, mensaje);
         } catch (SQLException e){
             e.printStackTrace();
         }
