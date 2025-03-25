@@ -3,6 +3,8 @@ package Proveedores;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class ProveedoresGUI {
     private JTable table1;
@@ -13,6 +15,7 @@ public class ProveedoresGUI {
     private JButton agregarButton;
     private JButton EliminarButton;
     private JButton actualizarButton;
+    int filas = 0;
 
     ProveedoresDAO proveedoresDAO = new ProveedoresDAO();
 
@@ -51,6 +54,23 @@ public class ProveedoresGUI {
                 int id_proveedor = Integer.parseInt(id_proveedorTextField.getText());
 
                 proveedoresDAO.eliminar(id_proveedor);
+            }
+        });
+
+
+        table1.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                int selectFila = table1.getSelectedRow();
+
+                if(fila > 0){
+                    nombreTextField.setText((String) table1.getValueAt(selectFila, 0));
+                    contactoTextField.setText((String) table1.getValueAt(selectFila, 1));
+                    categoria_productoTextField.setText((String) table1.getValueAt(selectFila, 2));
+
+                    filas = selectFila;
+                }
             }
         });
     }
