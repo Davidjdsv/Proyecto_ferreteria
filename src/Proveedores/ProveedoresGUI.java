@@ -1,10 +1,17 @@
 package Proveedores;
 
+import Conexion.ConexionDB;
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class ProveedoresGUI {
     private JTable table1;
@@ -64,7 +71,7 @@ public class ProveedoresGUI {
                 super.mouseClicked(e);
                 int selectFila = table1.getSelectedRow();
 
-                if(fila > 0){
+                if(selectFila > 0){
                     nombreTextField.setText((String) table1.getValueAt(selectFila, 0));
                     contactoTextField.setText((String) table1.getValueAt(selectFila, 1));
                     categoria_productoTextField.setText((String) table1.getValueAt(selectFila, 2));
@@ -79,6 +86,35 @@ public class ProveedoresGUI {
         nombreTextField.setText("");
         contactoTextField.setText("");
         categoria_productoTextField.setText("");
+    }
+
+    ConexionDB conexionDB = new ConexionDB();
+
+    public void obtenerDatos(){
+        DefaultTableModel dtm = new DefaultTableModel();
+
+        dtm.addColumn("Id_proveedor");
+        dtm.addColumn("Nombre");
+        dtm.addColumn("Categoría producto");
+
+        table1.setModel(dtm);
+        String[] dato = new String[3];
+        Connection con = conexionDB.getConnection();
+
+        try {
+            Statement stmt = con.createStatement();
+            String query = "SELECT * FROM proveedores";
+            ResultSet rs = stmt.executeQuery(query);
+
+            while(rs.next()){
+                dato[0] = rs.getString(1);
+                dato[1] = rs.getString(2);
+                dato[2] = rs.getString(3);
+                dtm.addRow(dato);
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
     }
 
 
