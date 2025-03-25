@@ -33,6 +33,8 @@ public class ClientesGUI {
 
 
     public ClientesGUI() {
+        mostrar();
+        textField1.setEnabled(false);
         agregarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -69,7 +71,7 @@ public class ClientesGUI {
                 String correo = textField5.getText();
                 int id = Integer.parseInt(textField1.getText());
 
-                Clientes Clientes = new Clientes(0, nombre, telefono, direccion, correo);
+                Clientes Clientes = new Clientes(id, nombre, telefono, direccion, correo);
                 ClientesDAO.actualizar(Clientes);
 
                 mostrar();
