@@ -1,38 +1,38 @@
 package Inventario;
 
 public class Inventario {
-    private int id_inventario;
-    private String nombre;
+    private int id_producto;
+    private String nombre_producto;
     private String categoria;
-    private double precio;
-    private int cantidad_disponible;
-    private int id_proveedor;
+    private double cantidad_stock;
+    private int precio_producto;
+    private int id_proveedor_asociado;
 
-    public Inventario(int id_inventario, String nombre, String categoria,
-                      double precio, int cantidad_disponible, int id_proveedor) {
-        this.id_inventario = id_inventario;
-        this.nombre = nombre;
+    public Inventario(int id_producto, String nombre_producto, String categoria,
+                      double cantidad_stock, int precio_producto, int id_proveedor_asociado) {
+        this.id_producto = id_producto;
+        this.nombre_producto = nombre_producto;
         this.categoria = categoria;
-        this.precio = precio;
-        this.cantidad_disponible = cantidad_disponible;
-        this.id_proveedor = id_proveedor;
+        this.cantidad_stock = cantidad_stock;
+        this.precio_producto = precio_producto;
+        this.id_proveedor_asociado = id_proveedor_asociado;
     }
 
     // Getters and Setters
     public int getId_inventario() {
-        return id_inventario;
+        return id_producto;
     }
 
-    public void setId_inventario(int id_inventario) {
-        this.id_inventario = id_inventario;
+    public void setId_inventario(int id_producto) {
+        this.id_producto = id_producto;
     }
 
     public String getNombre() {
-        return nombre;
+        return nombre_producto;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setNombre(String nombre_producto) {
+        this.nombre_producto = nombre_producto;
     }
 
     public String getCategoria() {
@@ -44,26 +44,26 @@ public class Inventario {
     }
 
     public double getPrecio() {
-        return precio;
+        return cantidad_stock;
     }
 
-    public void setPrecio(double precio) {
-        this.precio = precio;
+    public void setPrecio(double cantidad_stock) {
+        this.cantidad_stock = cantidad_stock;
     }
 
     public int getCantidad_disponible() {
-        return cantidad_disponible;
+        return precio_producto;
     }
 
-    public void setCantidad_disponible(int cantidad_disponible) {
-        this.cantidad_disponible = cantidad_disponible;
+    public void setCantidad_disponible(int precio_producto) {
+        this.precio_producto = precio_producto;
     }
 
     public int getId_proveedor() {
-        return id_proveedor;
+        return id_proveedor_asociado;
     }
 
-    public void setId_proveedor(int id_proveedor) {
-        this.id_proveedor = id_proveedor;
+    public void setId_proveedor(int id_proveedor_asociado) {
+        this.id_proveedor_asociado = id_proveedor_asociado;
     }
 }
