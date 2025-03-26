@@ -24,26 +24,33 @@ public class InventarioDAO {
         Connection con = conexionDB.getConnection();
 
         try {
-            // Verificar si el proveedor existe
-            if (!validarProveedor(inventario.getId_proveedor())) {
+            // Verificar si el proveedor existe (si se proporciona)
+            if (inventario.getId_proveedor_asociado() != null &&
+                    !validarProveedor(inventario.getId_proveedor_asociado())) {
                 JOptionPane.showMessageDialog(null,
-                        "Error: El proveedor con ID " + inventario.getId_proveedor() + " no existe",
+                        "Error: El proveedor con ID " + inventario.getId_proveedor_asociado() + " no existe",
                         "Error de Proveedor",
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             // Consulta para insertar nuevo producto
-            String query = "INSERT INTO inventario (nombre, categoria, precio, cantidad_disponible, id_proveedor) VALUES (?,?,?,?,?)";
+            String query = "INSERT INTO inventario_productos (nombre_producto, categoria, cantidad_stock, precio_producto, id_proveedor_asociado) VALUES (?,?,?,?,?)";
 
             PreparedStatement pst = con.prepareStatement(query);
 
             // Establecer parámetros
-            pst.setString(1, inventario.getNombre());
+            pst.setString(1, inventario.getNombre_producto());
             pst.setString(2, inventario.getCategoria());
-            pst.setDouble(3, inventario.getPrecio());
-            pst.setInt(4, inventario.getCantidad_disponible());
-            pst.setInt(5, inventario.getId_proveedor());
+            pst.setInt(3, inventario.getCantidad_stock());
+            pst.setInt(4, inventario.getPrecio_producto());
+
+            // Manejar el caso en que el proveedor puede ser null
+            if (inventario.getId_proveedor_asociado() != null) {
+                pst.setInt(5, inventario.getId_proveedor_asociado());
+            } else {
+                pst.setNull(5, java.sql.Types.INTEGER);
+            }
 
             // Ejecutar inserción
             int resultado = pst.executeUpdate();
@@ -64,17 +71,17 @@ public class InventarioDAO {
 
     /**
      * Elimina un producto del inventario por su ID
-     * @param id_inventario ID del producto a eliminar
+     * @param id_producto ID del producto a eliminar
      */
-    public void eliminar(int id_inventario) {
+    public void eliminar(int id_producto) {
         Connection con = conexionDB.getConnection();
 
         try {
             // Consulta para eliminar producto
-            String query = "DELETE FROM inventario WHERE id_inventario = ?";
+            String query = "DELETE FROM inventario_productos WHERE id_producto = ?";
 
             PreparedStatement pst = con.prepareStatement(query);
-            pst.setInt(1, id_inventario);
+            pst.setInt(1, id_producto);
 
             // Ejecutar eliminación
             int resultado = pst.executeUpdate();
@@ -83,7 +90,7 @@ public class InventarioDAO {
             if (resultado > 0) {
                 JOptionPane.showMessageDialog(null, "Producto eliminado correctamente");
             } else {
-                JOptionPane.showMessageDialog(null, "Error al eliminar producto");
+                JOptionPane.showMessageDialog(null, "Producto no encontrado");
             }
 
             con.close();
@@ -102,27 +109,35 @@ public class InventarioDAO {
         Connection con = conexionDB.getConnection();
 
         try {
-            // Verificar si el proveedor existe
-            if (!validarProveedor(inventario.getId_proveedor())) {
+            // Verificar si el proveedor existe (si se proporciona)
+            if (inventario.getId_proveedor_asociado() != null &&
+                    !validarProveedor(inventario.getId_proveedor_asociado())) {
                 JOptionPane.showMessageDialog(null,
-                        "Error: El proveedor con ID " + inventario.getId_proveedor() + " no existe",
+                        "Error: El proveedor con ID " + inventario.getId_proveedor_asociado() + " no existe",
                         "Error de Proveedor",
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             // Consulta para actualizar producto
-            String query = "UPDATE inventario SET nombre = ?, categoria = ?, precio = ?, cantidad_disponible = ?, id_proveedor = ? WHERE id_inventario = ?";
+            String query = "UPDATE inventario_productos SET nombre_producto = ?, categoria = ?, cantidad_stock = ?, precio_producto = ?, id_proveedor_asociado = ? WHERE id_producto = ?";
 
             PreparedStatement pst = con.prepareStatement(query);
 
             // Establecer parámetros
-            pst.setString(1, inventario.getNombre());
+            pst.setString(1, inventario.getNombre_producto());
             pst.setString(2, inventario.getCategoria());
-            pst.setDouble(3, inventario.getPrecio());
-            pst.setInt(4, inventario.getCantidad_disponible());
-            pst.setInt(5, inventario.getId_proveedor());
-            pst.setInt(6, inventario.getId_inventario());
+            pst.setInt(3, inventario.getCantidad_stock());
+            pst.setInt(4, inventario.getPrecio_producto());
+
+            // Manejar el caso en que el proveedor puede ser null
+            if (inventario.getId_proveedor_asociado() != null) {
+                pst.setInt(5, inventario.getId_proveedor_asociado());
+            } else {
+                pst.setNull(5, java.sql.Types.INTEGER);
+            }
+
+            pst.setInt(6, inventario.getId_producto());
 
             // Ejecutar actualización
             int resultado = pst.executeUpdate();
