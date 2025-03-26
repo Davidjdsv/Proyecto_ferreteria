@@ -19,7 +19,7 @@ public class InventarioGUI {
     private JTextField nombre;
     private JTextField categoria;
     private JTextField precio;
-    private JTextField cantidad_disponible;
+    private JTextField cantidad_stock;
     private JTextField id_proveedor;
     private JButton agregarButton;
     private JButton actualizarButton;
@@ -36,11 +36,11 @@ public class InventarioGUI {
             public void actionPerformed(ActionEvent e) {
                 String nombreProducto = nombre.getText();
                 String categoriaProducto = categoria.getText();
-                double precioProducto = Double.parseDouble(precio.getText());
-                int cantidadDisponible = Integer.parseInt(cantidad_disponible.getText());
-                int idProveedor = Integer.parseInt(id_proveedor.getText());
+                int precioProducto = Integer.parseInt(precio.getText());
+                int cantidadStock = Integer.parseInt(cantidad_stock.getText());
+                Integer idProveedor = id_proveedor.getText().isEmpty() ? null : Integer.parseInt(id_proveedor.getText());
 
-                Inventario inventario = new Inventario(0, nombreProducto, categoriaProducto, precioProducto, cantidadDisponible, idProveedor);
+                Inventario inventario = new Inventario(0, nombreProducto, categoriaProducto, cantidadStock, precioProducto, idProveedor);
                 inventarioDAO.agregar(inventario);
                 obtener_datos();
                 clear();
@@ -52,12 +52,12 @@ public class InventarioGUI {
             public void actionPerformed(ActionEvent e) {
                 String nombreProducto = nombre.getText();
                 String categoriaProducto = categoria.getText();
-                double precioProducto = Double.parseDouble(precio.getText());
-                int cantidadDisponible = Integer.parseInt(cantidad_disponible.getText());
-                int idProveedor = Integer.parseInt(id_proveedor.getText());
+                int precioProducto = Integer.parseInt(precio.getText());
+                int cantidadStock = Integer.parseInt(cantidad_stock.getText());
                 int idProducto = Integer.parseInt(id.getText());
+                Integer idProveedor = id_proveedor.getText().isEmpty() ? null : Integer.parseInt(id_proveedor.getText());
 
-                Inventario inventario = new Inventario(idProducto, nombreProducto, categoriaProducto, precioProducto, cantidadDisponible, idProveedor);
+                Inventario inventario = new Inventario(idProducto, nombreProducto, categoriaProducto, cantidadStock, precioProducto, idProveedor);
                 inventarioDAO.actualizar(inventario);
                 obtener_datos();
                 clear();
@@ -84,9 +84,12 @@ public class InventarioGUI {
                     id.setText(table1.getValueAt(selectFila, 0).toString());
                     nombre.setText(table1.getValueAt(selectFila, 1).toString());
                     categoria.setText(table1.getValueAt(selectFila, 2).toString());
-                    precio.setText(table1.getValueAt(selectFila, 3).toString());
-                    cantidad_disponible.setText(table1.getValueAt(selectFila, 4).toString());
-                    id_proveedor.setText(table1.getValueAt(selectFila, 5).toString());
+                    cantidad_stock.setText(table1.getValueAt(selectFila, 3).toString());
+                    precio.setText(table1.getValueAt(selectFila, 4).toString());
+
+                    // Handle potential null value for provider ID
+                    Object proveedorValue = table1.getValueAt(selectFila, 5);
+                    id_proveedor.setText(proveedorValue == null ? "" : proveedorValue.toString());
                 }
             }
         });
@@ -97,7 +100,7 @@ public class InventarioGUI {
         nombre.setText("");
         categoria.setText("");
         precio.setText("");
-        cantidad_disponible.setText("");
+        cantidad_stock.setText("");
         id_proveedor.setText("");
     }
 
@@ -106,12 +109,12 @@ public class InventarioGUI {
     public void obtener_datos() {
         DefaultTableModel model = new DefaultTableModel();
 
-        model.addColumn("id");
-        model.addColumn("nombre");
+        model.addColumn("id_producto");
+        model.addColumn("nombre_producto");
         model.addColumn("categoria");
-        model.addColumn("precio");
-        model.addColumn("cantidad_disponible");
-        model.addColumn("id_proveedor");
+        model.addColumn("cantidad_stock");
+        model.addColumn("precio_producto");
+        model.addColumn("id_proveedor_asociado");
 
         table1.setModel(model);
         Object[] dato = new Object[6];
@@ -119,16 +122,16 @@ public class InventarioGUI {
 
         try {
             Statement stmt = con.createStatement();
-            String query = "SELECT * FROM inventario";
+            String query = "SELECT * FROM inventario_productos";
             ResultSet rs = stmt.executeQuery(query);
 
             while (rs.next()) {
-                dato[0] = rs.getInt(1);
-                dato[1] = rs.getString(2);
-                dato[2] = rs.getString(3);
-                dato[3] = rs.getDouble(4);
-                dato[4] = rs.getInt(5);
-                dato[5] = rs.getInt(6);
+                dato[0] = rs.getInt("id_producto");
+                dato[1] = rs.getString("nombre_producto");
+                dato[2] = rs.getString("categoria");
+                dato[3] = rs.getInt("cantidad_stock");
+                dato[4] = rs.getInt("precio_producto");
+                dato[5] = rs.getObject("id_proveedor_asociado");
                 model.addRow(dato);
             }
         } catch (SQLException e) {
