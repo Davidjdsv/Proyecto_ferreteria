@@ -13,6 +13,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * Clase ProveedoresGUI que representa la interfaz gráfica para gestionar proveedores.
+ * Permite realizar operaciones CRUD como agregar, actualizar y eliminar proveedores de la base de datos.
+ * Utiliza {@link ProveedoresDAO} para interactuar con la base de datos y {@link ConexionDB} para la conexión.
+ *
+ * @author Davidjdsv
+ */
 public class ProveedoresGUI {
     private JTable table1;
     private JTextField id_proveedorTextField;
@@ -20,17 +27,22 @@ public class ProveedoresGUI {
     private JTextField nombreTextField;
     private JTextField categoria_productoTextField;
     private JButton agregarButton;
-    private JButton EliminarButton;
+    private JButton eliminarButton;
     private JButton actualizarButton;
     private JPanel main;
-    int filas = 0;
+    private int filas = 0;
 
-    ProveedoresDAO proveedoresDAO = new ProveedoresDAO();
+    private ProveedoresDAO proveedoresDAO = new ProveedoresDAO();
+    private ConexionDB conexionDB = new ConexionDB();
 
-    //TODO: Botón agregar
+    /**
+     * Constructor de la clase ProveedoresGUI.
+     * Configura los eventos de los botones y obtiene los datos iniciales de la base de datos.
+     */
     public ProveedoresGUI() {
         id_proveedorTextField.setEnabled(false);
         obtenerDatos();
+
         agregarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -45,7 +57,6 @@ public class ProveedoresGUI {
             }
         });
 
-        //TODO: Botón de actualizar
         actualizarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -61,18 +72,15 @@ public class ProveedoresGUI {
             }
         });
 
-
-        EliminarButton.addActionListener(new ActionListener() {
+        eliminarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int id_proveedor = Integer.parseInt(id_proveedorTextField.getText());
-
                 proveedoresDAO.eliminar(id_proveedor);
                 obtenerDatos();
                 limpiar();
             }
         });
-
 
         table1.addMouseListener(new MouseAdapter() {
             @Override
@@ -80,11 +88,11 @@ public class ProveedoresGUI {
                 super.mouseClicked(e);
                 int selectFila = table1.getSelectedRow();
 
-                if(selectFila >= 0){
-                    id_proveedorTextField.setText((String) table1.getValueAt(selectFila, 0));
-                    nombreTextField.setText((String) table1.getValueAt(selectFila, 1));
-                    contactoTextField.setText((String) table1.getValueAt(selectFila, 2));
-                    categoria_productoTextField.setText((String) table1.getValueAt(selectFila, 3));
+                if (selectFila >= 0) {
+                    id_proveedorTextField.setText(table1.getValueAt(selectFila, 0).toString());
+                    nombreTextField.setText(table1.getValueAt(selectFila, 1).toString());
+                    contactoTextField.setText(table1.getValueAt(selectFila, 2).toString());
+                    categoria_productoTextField.setText(table1.getValueAt(selectFila, 3).toString());
 
                     filas = selectFila;
                 }
@@ -92,16 +100,20 @@ public class ProveedoresGUI {
         });
     }
 
-    public void limpiar(){
+    /**
+     * Limpia los campos de entrada del formulario.
+     */
+    public void limpiar() {
         id_proveedorTextField.setText("");
         nombreTextField.setText("");
         contactoTextField.setText("");
         categoria_productoTextField.setText("");
     }
 
-    ConexionDB conexionDB = new ConexionDB();
-
-    public void obtenerDatos(){
+    /**
+     * Obtiene los datos de los proveedores desde la base de datos y los muestra en la tabla.
+     */
+    public void obtenerDatos() {
         DefaultTableModel dtm = new DefaultTableModel();
 
         dtm.addColumn("Id_proveedor");
@@ -110,7 +122,7 @@ public class ProveedoresGUI {
         dtm.addColumn("Categoría_producto");
 
         table1.setModel(dtm);
-        String[] dato = new String[4];
+        Object[] dato = new Object[4];
         Connection con = conexionDB.getConnection();
 
         try {
@@ -118,20 +130,25 @@ public class ProveedoresGUI {
             String query = "SELECT * FROM proveedores";
             ResultSet rs = stmt.executeQuery(query);
 
-            while(rs.next()){
-                dato[0] = rs.getString(1);
+            while (rs.next()) {
+                dato[0] = rs.getInt(1);
                 dato[1] = rs.getString(2);
                 dato[2] = rs.getString(3);
                 dato[3] = rs.getString(4);
                 dtm.addRow(dato);
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Método principal que inicia la aplicación de gestión de proveedores.
+     *
+     * @param args Argumentos de la línea de comandos.
+     */
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Gestión de proveedores");
+        JFrame frame = new JFrame("Gestión de Proveedores");
         frame.setContentPane(new ProveedoresGUI().main);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
@@ -139,5 +156,4 @@ public class ProveedoresGUI {
         frame.setSize(700, 700);
         frame.setResizable(false);
     }
-
 }
