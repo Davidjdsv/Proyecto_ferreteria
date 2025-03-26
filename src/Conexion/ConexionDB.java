@@ -5,7 +5,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/**
+ * ConexionDB: Para hacer la conexión a la base de datos con MySQL
+ *@author Jhoan david Sinisterra
+ */
 public class ConexionDB {
+    /**
+     * Retorno del valor de la variable con
+     * @return Un objeto conexión de la base de datos si la conexión es exitosa, de lo contrario, devuelve null
+     */
     public Connection getConnection(){
         Connection con = null;
         try {
