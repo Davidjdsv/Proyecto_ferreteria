@@ -8,16 +8,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Clase de Acceso a Datos para manejar operaciones de Inventario
- * Gestiona la inserción, actualización y eliminación de productos
+ * Clase de Acceso a Datos (DAO) para operaciones de gestión de inventario.
+ * Maneja la inserción, actualización y eliminación de productos.
+ *
+ * @author Cristian Restrepo
+ * @version 1.0
  */
 public class InventarioDAO {
-    // Conexión a la base de datos
+    /** Conexión a la base de datos */
     private ConexionDB conexionDB = new ConexionDB();
 
     /**
-     * Agrega un nuevo producto al inventario
-     * Valida la existencia del proveedor antes de insertar
+     * Agrega un nuevo producto al inventario.
+     * Valida la existencia del proveedor antes de insertar.
+     *
      * @param inventario Objeto Inventario a insertar
      */
     public void agregar(Inventario inventario) {
@@ -70,7 +74,8 @@ public class InventarioDAO {
     }
 
     /**
-     * Elimina un producto del inventario por su ID
+     * Elimina un producto del inventario por su ID.
+     *
      * @param id_producto ID del producto a eliminar
      */
     public void eliminar(int id_producto) {
@@ -101,8 +106,9 @@ public class InventarioDAO {
     }
 
     /**
-     * Actualiza la información de un producto existente
-     * Valida la existencia del proveedor antes de actualizar
+     * Actualiza la información de un producto existente.
+     * Valida la existencia del proveedor antes de actualizar.
+     *
      * @param inventario Objeto Inventario con la información actualizada
      */
     public void actualizar(Inventario inventario) {
@@ -157,7 +163,8 @@ public class InventarioDAO {
     }
 
     /**
-     * Valida la existencia de un proveedor en la base de datos
+     * Valida la existencia de un proveedor en la base de datos.
+     *
      * @param id_proveedor ID del proveedor a validar
      * @return true si el proveedor existe, false en caso contrario
      */
