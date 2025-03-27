@@ -96,7 +96,7 @@
           <text value="Agregar"/>
         </properties>
       </component>
-      <component id="13a5b" class="javax.swing.JButton" binding="EliminarButton">
+      <component id="13a5b" class="javax.swing.JButton" binding="eliminarButton">
         <constraints>
           <grid row="9" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
