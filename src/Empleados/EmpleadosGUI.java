@@ -1,7 +1,6 @@
 package Empleados;
 
 import Conexion.ConexionDB;
-import Conexion.ConexionDB;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -14,20 +13,50 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * Interfaz gráfica de usuario para la gestión de empleados.
+ *
+ * @author Cristian Restrepo
+ * @version 1.0
+ */
 public class EmpleadosGUI {
+    /** Panel principal de la interfaz */
     private JPanel main;
+
+    /** Tabla para mostrar los empleados */
     private JTable table1;
+
+    /** Campo de texto para el ID del empleado */
     private JTextField ID;
+
+    /** Campo de texto para el nombre del empleado */
     private JTextField Nombre;
+
+    /** Campo de texto para el salario del empleado */
     private JTextField Salario;
+
+    /** Botón para agregar un nuevo empleado */
     private JButton agregarButton;
+
+    /** Botón para actualizar la información de un empleado */
     private JButton actualizarButton;
+
+    /** Botón para eliminar un empleado */
     private JButton eliminarButton;
+
+    /** Combo box para seleccionar el cargo del empleado */
     private JComboBox comboBox1;
+
+    /** Variable para rastrear la fila seleccionada */
     int filas = 0;
 
+    /** Objeto para realizar operaciones de acceso a datos */
     EmpleadosDAO empleadosDAO = new EmpleadosDAO();
 
+    /**
+     * Constructor de la interfaz gráfica de empleados.
+     * Inicializa los componentes y configura los listeners.
+     */
     public EmpleadosGUI() {
         obtener_datos();
         ID.setEnabled(false);
@@ -89,6 +118,9 @@ public class EmpleadosGUI {
         });
     }
 
+    /**
+     * Limpia los campos de entrada de la interfaz.
+     */
     public void clear() {
         ID.setText("");
         Nombre.setText("");
@@ -96,8 +128,12 @@ public class EmpleadosGUI {
         Salario.setText("");
     }
 
+    /** Conexión a la base de datos */
     ConexionDB conexionDB = new ConexionDB();
 
+    /**
+     * Obtiene y muestra los datos de empleados en la tabla.
+     */
     public void obtener_datos() {
         DefaultTableModel model = new DefaultTableModel();
 
@@ -127,6 +163,11 @@ public class EmpleadosGUI {
         }
     }
 
+    /**
+     * Método principal para iniciar la aplicación de gestión de empleados.
+     *
+     * @param args Argumentos de línea de comandos
+     */
     public static void main(String[] args) {
         JFrame frame = new JFrame("Gestión de Empleados");
         frame.setContentPane(new EmpleadosGUI().main);

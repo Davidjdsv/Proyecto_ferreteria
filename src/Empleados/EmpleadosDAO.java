@@ -7,10 +7,22 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * Clase de Acceso a Datos (DAO) para operaciones CRUD de Empleados.
+ *
+ * @author Cristian Restrepo
+ * @version 1.0
+ */
 public class EmpleadosDAO
 {
+    /** Conexión a la base de datos */
     private ConexionDB conexionDB = new ConexionDB();
 
+    /**
+     * Agrega un nuevo empleado a la base de datos.
+     *
+     * @param empleados Objeto Empleados a ser agregado
+     */
     public void agregar(Empleados empleados)
     {
         Connection con = conexionDB.getConnection();
@@ -44,6 +56,11 @@ public class EmpleadosDAO
         }
     }
 
+    /**
+     * Elimina un empleado de la base de datos por su ID.
+     *
+     * @param id_empleado Identificador del empleado a eliminar
+     */
     public void eliminar(int id_empleado)
     {
         Connection con = conexionDB.getConnection();
@@ -74,6 +91,11 @@ public class EmpleadosDAO
         }
     }
 
+    /**
+     * Actualiza la información de un empleado en la base de datos.
+     *
+     * @param empleados Objeto Empleados con la información actualizada
+     */
     public void actualizar(Empleados empleados)
     {
         Connection con = conexionDB.getConnection();
