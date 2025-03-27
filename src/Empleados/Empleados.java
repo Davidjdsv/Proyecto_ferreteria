@@ -3,7 +3,7 @@ package Empleados;
 /**
  * Representa un empleado con sus atributos básicos.
  *
- * @author Cristian Restrepo
+ * @author Cristian Restrepo Muriel
  * @version 1.0
  */
 public class Empleados
