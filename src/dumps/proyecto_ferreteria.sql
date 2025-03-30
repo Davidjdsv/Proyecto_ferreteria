@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 25-03-2025 a las 23:40:34
+-- Tiempo de generación: 31-03-2025 a las 00:00:08
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -41,7 +41,13 @@ CREATE TABLE `clientes` (
 
 INSERT INTO `clientes` (`id_cliente`, `nombre`, `telefono`, `direccion`, `correo`) VALUES
 (1, 'david', '312231', 'calle 23', 'dasd@cas.com'),
-(5, 'julian', '3125554355', 'calle32-44', 'juli231@gmail.com');
+(5, 'julian', '3125554355', 'calle32-44', 'juli231@gmail.com'),
+(6, 'Rasputin', '31244421', '3123', 'rasp213@jasdj.com'),
+(7, 'Carlos Pérez', '3123456789', 'Calle 1', 'carlos.perez@example.com'),
+(8, 'Mariana López', '3129876543', 'Avenida Siempre Viva 742', 'mariana.lopez@example.com'),
+(9, 'Andrés García', '3125678901', 'Calle Falsa 123', 'andres.garcia@example.com'),
+(10, 'Sofía Rodríguez', '3124567890', 'Avenida Central 456', 'sofia.rodriguez@example.com'),
+(11, 'Miguel Hernández', '3126789012', 'Calle 2', 'miguel.hernandez@example.com');
 
 -- --------------------------------------------------------
 
@@ -62,7 +68,12 @@ CREATE TABLE `empleados` (
 
 INSERT INTO `empleados` (`id_empleado`, `nombre`, `cargo`, `salario`) VALUES
 (1, 'Alojo', 'Empleado', 350000.00),
-(4, 'Jhoan', 'Empleado', 200000.00);
+(4, 'Jhoan', 'Empleado', 200000.00),
+(5, 'Luis Fernández', 'Gerente', 1000000.00),
+(6, 'Ana Torres', 'Cajera', 1000000.00),
+(7, 'Pedro Gómez', 'Vendedor', 1000000.00),
+(8, 'Camila Ramírez', 'Auxiliar de Almacén', 1000000.00),
+(9, 'Jorge Castillo', 'Supervisor', 1000000.00);
 
 -- --------------------------------------------------------
 
@@ -79,6 +90,13 @@ CREATE TABLE `inventario_productos` (
   `id_proveedor_asociado` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `inventario_productos`
+--
+
+INSERT INTO `inventario_productos` (`id_producto`, `nombre_producto`, `categoria`, `cantidad_stock`, `precio_producto`, `id_proveedor_asociado`) VALUES
+(2, 'Cristian', 'Herramienta', 40, 500, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -90,6 +108,7 @@ CREATE TABLE `ordenes_compra` (
   `id_cliente` int(11) NOT NULL,
   `id_empleado` int(11) NOT NULL,
   `id_producto` int(11) NOT NULL,
+  `total` double(8,2) DEFAULT NULL,
   `estado_orden` enum('pendiente','pagada','enviada') NOT NULL,
   `fecha_compra` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -112,9 +131,14 @@ CREATE TABLE `proveedores` (
 --
 
 INSERT INTO `proveedores` (`id_proveedor`, `nombre`, `contacto`, `categoria_producto`) VALUES
-(1, 'asd', '12345', 'herramientas'),
-(4, 'Karol Arbelaez', '31123441', 'Clavos'),
-(5, 'Quico', '5671222132', 'Maquinaria');
+(1, 'Jhoan David', '12345', 'Herramientas'),
+(4, 'Karol Arbelaez', '31123441', 'Herramientas'),
+(5, 'Quico', '5671222132', 'Maquinaria'),
+(7, 'Suministros Industriales S.A.', '3123456789', 'Herramientas'),
+(8, 'ElectroPartes LTDA', '3159876543', 'Materiales Eléctricos'),
+(9, 'Maderas y Construcción', '3101122334', 'Madera y Derivados'),
+(10, 'FerreMax Distribuidores', '3195566778', 'Tornillos y Fijaciones'),
+(11, 'TecnoPlásticos S.R.L.', '3112233445', 'Tubos y Conexiones');
 
 -- --------------------------------------------------------
 
@@ -125,7 +149,9 @@ INSERT INTO `proveedores` (`id_proveedor`, `nombre`, `contacto`, `categoria_prod
 CREATE TABLE `registro_ventas` (
   `id_venta` int(11) NOT NULL,
   `id_orden_compra` int(11) NOT NULL,
-  `total` int(11) NOT NULL
+  `id_producto` int(11) DEFAULT NULL,
+  `cantidad` int(11) DEFAULT NULL,
+  `sub_total` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -171,7 +197,8 @@ ALTER TABLE `proveedores`
 --
 ALTER TABLE `registro_ventas`
   ADD PRIMARY KEY (`id_venta`),
-  ADD KEY `id_orden_compra` (`id_orden_compra`);
+  ADD KEY `id_orden_compra` (`id_orden_compra`),
+  ADD KEY `fk_id_producto` (`id_producto`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -181,19 +208,19 @@ ALTER TABLE `registro_ventas`
 -- AUTO_INCREMENT de la tabla `clientes`
 --
 ALTER TABLE `clientes`
-  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `empleados`
 --
 ALTER TABLE `empleados`
-  MODIFY `id_empleado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_empleado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `inventario_productos`
 --
 ALTER TABLE `inventario_productos`
-  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `ordenes_compra`
@@ -205,7 +232,7 @@ ALTER TABLE `ordenes_compra`
 -- AUTO_INCREMENT de la tabla `proveedores`
 --
 ALTER TABLE `proveedores`
-  MODIFY `id_proveedor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_proveedor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `registro_ventas`
@@ -235,6 +262,7 @@ ALTER TABLE `ordenes_compra`
 -- Filtros para la tabla `registro_ventas`
 --
 ALTER TABLE `registro_ventas`
+  ADD CONSTRAINT `fk_id_producto` FOREIGN KEY (`id_producto`) REFERENCES `inventario_productos` (`id_producto`),
   ADD CONSTRAINT `registro_ventas_ibfk_1` FOREIGN KEY (`id_orden_compra`) REFERENCES `ordenes_compra` (`id_orden_compra`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
