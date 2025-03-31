@@ -1,4 +1,7 @@
+package MenuPrincipal;
+
 import Clientes.ClientesGUI;
+import Inventario.InventarioGUI;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -6,22 +9,28 @@ import java.awt.event.ActionListener;
 
 public class MainMenu {
     private JPanel main;
-    private JButton button1;
+    private JButton clientesMenu;
+    private JButton empleadosMenu;
+    private JButton inventariosMenu;
+    private JButton ordenesCompraMenu;
+    private JButton proveedoresMenu;
 
     public MainMenu(){
 
-        button1.addActionListener(new ActionListener() {
+        clientesMenu.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                abrirClientes();
+                JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor(clientesMenu);
+                jFrame.dispose();
+                ClientesGUI clientesGUI = new ClientesGUI();
+                clientesGUI.main(null);
             }
         });
+
+
+
     }
 
-    public void abrirClientes(){
-        ClientesGUI clientesGUI = new ClientesGUI();
-        clientesGUI.mostrar();
-    }
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Menú principal");
@@ -29,7 +38,7 @@ public class MainMenu {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        frame.setSize(880,700);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setResizable(false);
     }
 }
