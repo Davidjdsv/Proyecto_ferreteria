@@ -4,7 +4,6 @@ import Clientes.ClientesGUI;
 import Empleados.EmpleadosGUI;
 import Inventario.InventarioGUI;
 import Proveedores.ProveedoresGUI;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,6 +15,7 @@ public class MainMenu {
     private JButton inventariosMenu;
     private JButton ordenesCompraMenu;
     private JButton proveedoresMenu;
+    private JPanel jPanelBackground;
 
     public MainMenu(){
 
@@ -54,6 +54,8 @@ public class MainMenu {
                 ProveedoresGUI.main(null);
             }
         });
+
+        jPanelBackground = new JPanelBackground("/Img/hero-java-epic.webp");
     }
 
 
