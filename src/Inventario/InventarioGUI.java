@@ -1,6 +1,8 @@
 package Inventario;
 
 import Conexion.ConexionDB;
+import MenuPrincipal.MainMenu;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
@@ -52,6 +54,7 @@ public class InventarioGUI {
 
     /** Botón para eliminar un producto */
     private JButton eliminarButton;
+    private JButton volverButton;
 
     /** Objeto para realizar operaciones de acceso a datos */
     InventarioDAO inventarioDAO = new InventarioDAO();
@@ -126,6 +129,15 @@ public class InventarioGUI {
                 }
             }
         });
+
+        volverButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor(volverButton);
+                jFrame.dispose();
+                MainMenu.main(null);
+            }
+        });
     }
 
     /**
@@ -190,7 +202,7 @@ public class InventarioGUI {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        frame.setSize(800, 700);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setResizable(false);
     }
 }

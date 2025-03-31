@@ -27,8 +27,15 @@ public class MainMenu {
             }
         });
 
-
-
+        inventariosMenu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor(inventariosMenu);
+                jFrame.dispose();
+                InventarioGUI inventarioGUI = new InventarioGUI();
+                InventarioGUI.main(null);
+            }
+        });
     }
 
 
