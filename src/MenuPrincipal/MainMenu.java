@@ -3,6 +3,7 @@ package MenuPrincipal;
 import Clientes.ClientesGUI;
 import Empleados.EmpleadosGUI;
 import Inventario.InventarioGUI;
+import Proveedores.ProveedoresGUI;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -23,8 +24,7 @@ public class MainMenu {
             public void actionPerformed(ActionEvent e) {
                 JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor(clientesMenu);
                 jFrame.dispose();
-                ClientesGUI clientesGUI = new ClientesGUI();
-                clientesGUI.main(null);
+                ClientesGUI.main(null);
             }
         });
 
@@ -37,13 +37,21 @@ public class MainMenu {
             }
         });
 
-
         empleadosMenu.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor(empleadosMenu);
                 jFrame.dispose();
                 EmpleadosGUI.main(null);
+            }
+        });
+
+        proveedoresMenu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor(proveedoresMenu);
+                jFrame.dispose();
+                ProveedoresGUI.main(null);
             }
         });
     }
