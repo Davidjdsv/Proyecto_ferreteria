@@ -1,6 +1,7 @@
 package MenuPrincipal;
 
 import Clientes.ClientesGUI;
+import Empleados.EmpleadosGUI;
 import Inventario.InventarioGUI;
 
 import javax.swing.*;
@@ -32,8 +33,17 @@ public class MainMenu {
             public void actionPerformed(ActionEvent e) {
                 JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor(inventariosMenu);
                 jFrame.dispose();
-                InventarioGUI inventarioGUI = new InventarioGUI();
                 InventarioGUI.main(null);
+            }
+        });
+
+
+        empleadosMenu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor(empleadosMenu);
+                jFrame.dispose();
+                EmpleadosGUI.main(null);
             }
         });
     }
