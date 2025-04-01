@@ -54,8 +54,31 @@ public void agregar (RegistroVentas registroVentas){
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
 
+    public void actualizar(RegistroVentas registroVentas)
+    {
+        Connection con = conexionDB.getConnection();
+        String query = "UPDATE registoVentas SET id_orden_compra = ?,id_producto = ?,cantidad = ?,sub_total = ? WHERE id_venta";
 
+        try
+        {
+            PreparedStatement pst = con.prepareStatement(query);
+            pst.setInt(1,registroVentas.getId_orden_compra());
+            pst.setInt(2,registroVentas.getId_producto());
+            pst.setInt(3,registroVentas.getCantidad());
+            pst.setFloat(4,registroVentas.getSub_total());
+            pst.setInt(5,registroVentas.getId_venta());
+
+            int resultado = pst.executeUpdate();
+            if (resultado > 0) {
+                JOptionPane.showMessageDialog(null, "Cliente actualizado exitosamente");
+            } else {
+                JOptionPane.showMessageDialog(null, "Cliente no actualizado");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
     }
 }
