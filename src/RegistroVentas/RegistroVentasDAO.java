@@ -34,6 +34,30 @@ public void agregar (RegistroVentas registroVentas){
     }
 
     }
+
+    public void eliminar(int id_venta)
+    {
+        Connection con = conexionDB.getConnection();
+        String query = "DELETE FROM registroVentas WHERE id_venta = ?";
+
+        try
+        {
+            PreparedStatement pst = con.prepareStatement(query);
+            pst.setInt(1, id_venta);
+
+            int resultado = pst.executeUpdate();
+            if (resultado > 0) {
+                JOptionPane.showMessageDialog(null, "Cliente eliminado exitosamente");
+            } else {
+                JOptionPane.showMessageDialog(null, "Cliente no eliminado");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+
+    }
 }
 
 
