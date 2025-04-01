@@ -1,6 +1,7 @@
 package Empleados;
 
 import Conexion.ConexionDB;
+import MenuPrincipal.MainMenu;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -46,6 +47,7 @@ public class EmpleadosGUI {
 
     /** Combo box para seleccionar el cargo del empleado */
     private JComboBox comboBox1;
+    private JButton volverButton;
 
     /** Variable para rastrear la fila seleccionada */
     int filas = 0;
@@ -116,6 +118,15 @@ public class EmpleadosGUI {
                 }
             }
         });
+
+        volverButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor(volverButton);
+                jFrame.dispose();
+                MainMenu.main(null);
+            }
+        });
     }
 
     /**
@@ -174,7 +185,7 @@ public class EmpleadosGUI {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        frame.setSize(800, 700);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setResizable(false);
     }
 }
