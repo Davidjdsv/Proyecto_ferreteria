@@ -7,6 +7,7 @@ import Proveedores.ProveedoresGUI;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 
 public class MainMenu {
     private JPanel main;
@@ -55,7 +56,7 @@ public class MainMenu {
             }
         });
 
-        jPanelBackground = new JPanelBackground("/Img/hero-java-epic.webp");
+
     }
 
 
