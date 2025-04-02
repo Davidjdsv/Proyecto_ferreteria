@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import MenuPrincipal.MainMenu;
 
 public class ClientesGUI {
     private JPanel main;
@@ -24,6 +25,7 @@ public class ClientesGUI {
     private JButton agregarButton;
     private JButton eliminarButton;
     private JButton actualizarButton;
+    private JButton volverAlMenuButton;
 
     ClientesDAO ClientesDAO = new ClientesDAO();
 
@@ -96,6 +98,18 @@ public class ClientesGUI {
                 }
             }
         });
+
+
+        volverAlMenuButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor(volverAlMenuButton);
+                jFrame.dispose();
+
+                MainMenu mainMenu = new MainMenu();
+                mainMenu.main(null);
+            }
+        });
     }
 
         public void mostrar ()
@@ -141,7 +155,7 @@ public class ClientesGUI {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        frame.setSize(880,700);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setResizable(false);
     }
 }
