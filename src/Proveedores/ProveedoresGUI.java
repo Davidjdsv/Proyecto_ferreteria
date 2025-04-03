@@ -2,6 +2,7 @@ package Proveedores;
 
 import Conexion.ConexionDB;
 import MenuPrincipal.MainMenu;
+import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -159,6 +160,12 @@ public class ProveedoresGUI {
      * @param args Argumentos de la línea de comandos.
      */
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(new FlatArcDarkIJTheme());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         JFrame frame = new JFrame("Gestión de Proveedores");
         frame.setContentPane(new ProveedoresGUI().main);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
