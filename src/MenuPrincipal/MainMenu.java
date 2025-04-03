@@ -4,6 +4,8 @@ import Clientes.ClientesGUI;
 import Empleados.EmpleadosGUI;
 import Inventario.InventarioGUI;
 import Proveedores.ProveedoresGUI;
+import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -60,6 +62,11 @@ public class MainMenu {
 
 
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(new FlatArcDarkIJTheme());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         JFrame frame = new JFrame("Menú principal");
         frame.setContentPane(new MainMenu().main);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
