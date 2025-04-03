@@ -2,6 +2,7 @@ package Empleados;
 
 import Conexion.ConexionDB;
 import MenuPrincipal.MainMenu;
+import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -180,6 +181,12 @@ public class EmpleadosGUI {
      * @param args Argumentos de línea de comandos
      */
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(new FlatArcDarkIJTheme());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         JFrame frame = new JFrame("Gestión de Empleados");
         frame.setContentPane(new EmpleadosGUI().main);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
