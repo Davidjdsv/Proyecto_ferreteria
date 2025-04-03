@@ -1,6 +1,7 @@
 package Clientes;
 
 import Conexion.ConexionDB;
+import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -112,44 +113,50 @@ public class ClientesGUI {
         });
     }
 
-        public void mostrar ()
-        {
-            DefaultTableModel model = new DefaultTableModel();
-            model.addColumn("ID cliente");
-            model.addColumn("Nombre");
-            model.addColumn("Telefono");
-            model.addColumn("Direccion");
-            model.addColumn("Correo");
+    public void mostrar ()
+    {
+        DefaultTableModel model = new DefaultTableModel();
+        model.addColumn("ID cliente");
+        model.addColumn("Nombre");
+        model.addColumn("Telefono");
+        model.addColumn("Direccion");
+        model.addColumn("Correo");
 
-            table1.setModel(model);
-            String[] dato = new String[5];
-            Connection con = ConexionDB.getConnection();
+        table1.setModel(model);
+        String[] dato = new String[5];
+        Connection con = ConexionDB.getConnection();
 
-            try {
-                Statement stat = con.createStatement();
-                String  query = "SELECT * FROM clientes";
-                ResultSet fb = stat.executeQuery(query);
+        try {
+            Statement stat = con.createStatement();
+            String  query = "SELECT * FROM clientes";
+            ResultSet fb = stat.executeQuery(query);
 
-                while (fb.next())
-                {
-                    dato[0] = fb.getString(1);
-                    dato[1] = fb.getString(2);
-                    dato[2] = fb.getString(3);
-                    dato[3] = fb.getString(4);
-                    dato[4] = fb.getString(5);
-                    model.addRow(dato);
-                }
-            }
-            catch (SQLException e)
+            while (fb.next())
             {
-                e.printStackTrace();
+                dato[0] = fb.getString(1);
+                dato[1] = fb.getString(2);
+                dato[2] = fb.getString(3);
+                dato[3] = fb.getString(4);
+                dato[4] = fb.getString(5);
+                model.addRow(dato);
             }
         }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
 
 
 
 
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(new FlatArcDarkIJTheme());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         JFrame frame = new JFrame("Clientes");
         frame.setContentPane(new ClientesGUI().main);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
