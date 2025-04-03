@@ -15,6 +15,7 @@ public class MainMenu {
     private JButton inventariosMenu;
     private JButton ordenesCompraMenu;
     private JButton proveedoresMenu;
+    private JPanel jPanelBackground;
 
     public MainMenu(){
 
@@ -54,7 +55,7 @@ public class MainMenu {
             }
         });
 
-
+        jPanelBackground = new JPanelBackground("/Img/hero-java-epic.webp");
     }
 
 
