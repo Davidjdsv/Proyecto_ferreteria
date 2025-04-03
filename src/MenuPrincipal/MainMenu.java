@@ -3,6 +3,7 @@ package MenuPrincipal;
 import Clientes.ClientesGUI;
 import Empleados.EmpleadosGUI;
 import Inventario.InventarioGUI;
+import Orden_Compras.OrdenesCompraGUI;
 import Proveedores.ProveedoresGUI;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -55,7 +56,17 @@ public class MainMenu {
             }
         });
 
-        jPanelBackground = new JPanelBackground("/Img/hero-java-epic.webp");
+
+
+        //jPanelBackground = new JPanelBackground("/Img/hero-java-epic.webp");
+        ordenesCompraMenu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor(ordenesCompraMenu);
+                jFrame.dispose();
+                OrdenesCompraGUI.main(null);
+            }
+        });
     }
 
 
