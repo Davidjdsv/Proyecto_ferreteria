@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="flatlaf-3.5.4">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../Visual/flatlaf-3.5.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../Visual/flatlaf-intellij-themes-3.5.4.jar!/" />
+      <root url="file://$PROJECT_DIR$" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/src" />
+    </SOURCES>
+  </library>
+</component>
