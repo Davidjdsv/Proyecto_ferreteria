@@ -17,5 +17,7 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="mysql.connector.java2" level="project" />
+    <orderEntry type="library" name="flatlaf-intellij-themes-3.5.4" level="project" />
+    <orderEntry type="library" name="flatlaf-3.5.4" level="project" />
   </component>
 </module>
