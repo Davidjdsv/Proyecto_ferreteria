@@ -1,7 +1,6 @@
 package Empleados;
 
 import Conexion.ConexionDB;
-import MenuPrincipal.MainMenu;
 import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 
 import javax.swing.*;
@@ -119,15 +118,6 @@ public class EmpleadosGUI {
                 }
             }
         });
-
-        volverButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor(volverButton);
-                jFrame.dispose();
-                MainMenu.main(null);
-            }
-        });
     }
 
     /**
@@ -192,7 +182,8 @@ public class EmpleadosGUI {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setSize(1006,550);
+        frame.setLocationRelativeTo(null);
         frame.setResizable(false);
     }
 }

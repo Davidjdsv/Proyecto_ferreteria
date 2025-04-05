@@ -1,11 +1,6 @@
 package Orden_Compras;
 
-import MenuPrincipal.MainMenu;
-import Proveedores.ProveedoresGUI;
-
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class OrdenesCompraGUI {
     private JTable table1;
@@ -17,19 +12,9 @@ public class OrdenesCompraGUI {
     private JTextField fechaCompra;
     private JButton agregarCompraButton;
     private JButton actualizarCompraButton;
-    private JButton volverButton;
     private JPanel main;
 
     public OrdenesCompraGUI(){
-
-        volverButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor(volverButton);
-                jFrame.dispose();
-                MainMenu.main(null);
-            }
-        });
     }
 
     public static void main(String[] args) {
@@ -38,7 +23,8 @@ public class OrdenesCompraGUI {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setSize(1006,550);
+        frame.setLocationRelativeTo(null);
         frame.setResizable(false);
     }
 }

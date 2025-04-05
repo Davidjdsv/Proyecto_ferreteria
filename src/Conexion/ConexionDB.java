@@ -14,7 +14,7 @@ public class ConexionDB {
      * Retorno del valor de la variable con
      * @return Un objeto conexión de la base de datos si la conexión es exitosa, de lo contrario, devuelve null
      */
-    public Connection getConnection(){
+    public static Connection getConnection(){
         Connection con = null;
         try {
             con = DriverManager.getConnection("jdbc:mysql://localhost:3306/proyecto_ferreteria", "root", "");
