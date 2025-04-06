@@ -42,7 +42,7 @@ public class ChatCliente {
             // Bucle de comunicación entre cliente y servidor
             do {
                 // Solicita al usuario que escriba un mensaje
-                sendMessage = JOptionPane.showInputDialog("Escribe tu mensaje: ");
+                sendMessage = JOptionPane.showInputDialog("Cliente, Escribe tu mensaje: ");
 
                 // Si se escribe "salir" o se cancela, se notifica al servidor y se termina el ciclo
                 if (sendMessage == null || sendMessage.equalsIgnoreCase("salir")) {
