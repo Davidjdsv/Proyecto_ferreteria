@@ -5,6 +5,7 @@ import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -23,7 +24,7 @@ import java.sql.Statement;
  */
 public class InventarioGUI {
     /** Panel principal de la interfaz */
-    private JPanel main;
+    public JPanel main; // Make this public for direct access
 
     /** Tabla para mostrar los productos */
     private JTable table1;
@@ -55,6 +56,7 @@ public class InventarioGUI {
     /** Botón para eliminar un producto */
     private JButton eliminarButton;
     private JButton volverButton;
+    private JComboBox comboBox1;
 
     /** Objeto para realizar operaciones de acceso a datos */
     InventarioDAO inventarioDAO = new InventarioDAO();
@@ -71,8 +73,7 @@ public class InventarioGUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String nombreProducto = nombre.getText();
-                String categoriaProducto = categoria.getText();
-                int precioProducto = Integer.parseInt(precio.getText());
+                String categoriaProducto = comboBox1.getSelectedItem().toString();                int precioProducto = Integer.parseInt(precio.getText());
                 int cantidadStock = Integer.parseInt(cantidad_stock.getText());
                 Integer idProveedor = id_proveedor.getText().isEmpty() ? null : Integer.parseInt(id_proveedor.getText());
 
@@ -87,8 +88,7 @@ public class InventarioGUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String nombreProducto = nombre.getText();
-                String categoriaProducto = categoria.getText();
-                int precioProducto = Integer.parseInt(precio.getText());
+                String categoriaProducto = comboBox1.getSelectedItem().toString();                int precioProducto = Integer.parseInt(precio.getText());
                 int cantidadStock = Integer.parseInt(cantidad_stock.getText());
                 int idProducto = Integer.parseInt(id.getText());
                 Integer idProveedor = id_proveedor.getText().isEmpty() ? null : Integer.parseInt(id_proveedor.getText());
@@ -119,7 +119,7 @@ public class InventarioGUI {
                 if (selectFila >= 0) {
                     id.setText(table1.getValueAt(selectFila, 0).toString());
                     nombre.setText(table1.getValueAt(selectFila, 1).toString());
-                    categoria.setText(table1.getValueAt(selectFila, 2).toString());
+                    comboBox1.setSelectedItem(table1.getValueAt(selectFila, 2).toString());
                     cantidad_stock.setText(table1.getValueAt(selectFila, 3).toString());
                     precio.setText(table1.getValueAt(selectFila, 4).toString());
 
@@ -129,6 +129,21 @@ public class InventarioGUI {
                 }
             }
         });
+
+        // Add functionality to volverButton (if needed) to return to main menu
+        if (volverButton != null) {
+            volverButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // This will be handled by MenuPrueba
+                    Container parent = main.getParent();
+                    if (parent != null && parent.getLayout() instanceof CardLayout) {
+                        CardLayout cl = (CardLayout) parent.getLayout();
+                        cl.show(parent, "welcome");
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -137,7 +152,7 @@ public class InventarioGUI {
     public void clear() {
         id.setText("");
         nombre.setText("");
-        categoria.setText("");
+        comboBox1.setSelectedIndex(0);
         precio.setText("");
         cantidad_stock.setText("");
         id_proveedor.setText("");
@@ -180,6 +195,16 @@ public class InventarioGUI {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Returns the main panel of this GUI.
+     * This method is used by MenuPrueba to get the panel to display.
+     *
+     * @return The main panel of this GUI
+     */
+    public JPanel getMainPanel() {
+        return main; // Return the actual main panel instead of null
     }
 
     /**

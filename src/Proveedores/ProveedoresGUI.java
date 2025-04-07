@@ -5,6 +5,7 @@ import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -35,6 +36,10 @@ public class ProveedoresGUI {
 
     private ProveedoresDAO proveedoresDAO = new ProveedoresDAO();
     private ConexionDB conexionDB = new ConexionDB();
+
+    public JPanel getMainPanel() {
+        return main; // Return the actual main panel instead of null
+    }
 
     /**
      * Constructor de la clase ProveedoresGUI.
