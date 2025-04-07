@@ -63,8 +63,6 @@ public class ClienteGUI {
 
     public void enviarMensaje(){
         String mensaje = textField1.getText();
-
-
         if (mensaje != null && !mensaje.isEmpty()) {
             if (out != null) {
                 out.println(mensaje); // Enviar el mensaje al servidor
@@ -96,6 +94,7 @@ public class ClienteGUI {
             // Instanciar, Crear socket y conectar al servidor al puerto 12345
             socket = new Socket(serverAddress, 12345);
             actualizarTextArea("Conectado al servidor.\n");
+            actualizarTextArea("Bienvenido a nuestro chat apreciado cliente, ¿En qué le podemos servir?");
 
             // Configurar flujos de entrada/salida
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));

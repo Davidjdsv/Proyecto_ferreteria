@@ -55,6 +55,7 @@ public class ServidorGUI {
 
     public void iniciar(){
         try (ServerSocket serverSocket = new ServerSocket(12345)){
+            JOptionPane.showMessageDialog(null, "Servidor iniciado con éxito");
             do {
                 clientSocket = serverSocket.accept();
                 actualizarTextArea("Cliente Conectado al chat.\n");
@@ -111,7 +112,7 @@ public class ServidorGUI {
         frame.setContentPane(servidorGUI.main);
         //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // Comentado por alguna razón
         frame.pack();
-        frame.setSize(600, 400);
+        frame.setSize(600, 350);
         frame.setVisible(true);
     }
 }
