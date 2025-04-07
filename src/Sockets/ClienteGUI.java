@@ -94,7 +94,7 @@ public class ClienteGUI {
             // Instanciar, Crear socket y conectar al servidor al puerto 12345
             socket = new Socket(serverAddress, 12345);
             actualizarTextArea("Conectado al servidor.\n");
-            actualizarTextArea("Bienvenido a nuestro chat apreciado cliente, ¿En qué le podemos servir?");
+            actualizarTextArea("Bienvenido a nuestro chat apreciado cliente \n, ¿En qué le podemos servir?");
 
             // Configurar flujos de entrada/salida
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
