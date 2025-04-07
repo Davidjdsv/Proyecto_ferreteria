@@ -5,6 +5,7 @@ import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -33,6 +34,10 @@ public class ClientesGUI {
 
     int filas = 0 ;
 
+
+    public JPanel getMainPanel() {
+        return main; // Return the actual main panel instead of null
+    }
 
     public ClientesGUI() {
         mostrar();

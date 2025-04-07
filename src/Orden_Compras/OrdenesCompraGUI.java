@@ -1,6 +1,7 @@
 package Orden_Compras;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class OrdenesCompraGUI {
     private JTable table1;
@@ -15,6 +16,10 @@ public class OrdenesCompraGUI {
     private JPanel main;
 
     public OrdenesCompraGUI(){
+    }
+
+    public JPanel getMainPanel() {
+        return main; // Return the actual main panel instead of null
     }
 
     public static void main(String[] args) {
