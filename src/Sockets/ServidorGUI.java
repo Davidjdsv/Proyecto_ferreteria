@@ -15,7 +15,7 @@ import java.net.Socket;
 import static javax.swing.JOptionPane.*;
 
 public class ServidorGUI {
-    private JPanel main;
+    JPanel main;
     private JTextArea textArea1;
     private JButton enviarButton;
     private JTextField textField1;
@@ -98,7 +98,7 @@ public class ServidorGUI {
                     actualizarTextArea("Cliente ha abandonado el chat\n");
                     break;
                 }
-                actualizarTextArea("Cliente dice: " + recievedMessage + "\n");
+                actualizarTextArea("Cliente: " + recievedMessage + "\n");
             }
         } catch (IOException e){
             actualizarTextArea("Error al recibir el mensaje: " + e.getMessage() + "\n");
