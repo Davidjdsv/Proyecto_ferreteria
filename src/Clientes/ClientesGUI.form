@@ -12,12 +12,16 @@
         <constraints>
           <grid row="1" column="0" row-span="13" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
-        <properties/>
+        <properties>
+          <font name="JetBrains Mono"/>
+        </properties>
         <border type="none"/>
         <children>
           <component id="443af" class="javax.swing.JTable" binding="table1" default-binding="true">
             <constraints/>
-            <properties/>
+            <properties>
+              <font name="JetBrains Mono"/>
+            </properties>
           </component>
         </children>
       </scrollpane>
@@ -26,6 +30,7 @@
           <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
+          <font name="JetBrains Mono"/>
           <text value="Id"/>
         </properties>
       </component>
@@ -34,6 +39,7 @@
           <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
+          <font name="JetBrains Mono"/>
           <text value="Nombre"/>
         </properties>
       </component>
@@ -42,6 +48,7 @@
           <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
+          <font name="JetBrains Mono"/>
           <text value="Teléfono"/>
         </properties>
       </component>
@@ -50,6 +57,7 @@
           <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
+          <font name="JetBrains Mono"/>
           <text value="Dirección"/>
         </properties>
       </component>
@@ -58,6 +66,7 @@
           <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
+          <font name="JetBrains Mono"/>
           <text value="Correo"/>
         </properties>
       </component>
@@ -67,7 +76,9 @@
             <preferred-size width="150" height="-1"/>
           </grid>
         </constraints>
-        <properties/>
+        <properties>
+          <font name="JetBrains Mono"/>
+        </properties>
       </component>
       <component id="c9cc" class="javax.swing.JTextField" binding="textField2" default-binding="true">
         <constraints>
@@ -75,7 +86,9 @@
             <preferred-size width="150" height="-1"/>
           </grid>
         </constraints>
-        <properties/>
+        <properties>
+          <font name="JetBrains Mono"/>
+        </properties>
       </component>
       <component id="9ed5" class="javax.swing.JTextField" binding="textField3" default-binding="true">
         <constraints>
@@ -83,7 +96,9 @@
             <preferred-size width="150" height="-1"/>
           </grid>
         </constraints>
-        <properties/>
+        <properties>
+          <font name="JetBrains Mono"/>
+        </properties>
       </component>
       <component id="ac63e" class="javax.swing.JTextField" binding="textField4" default-binding="true">
         <constraints>
@@ -91,7 +106,9 @@
             <preferred-size width="150" height="-1"/>
           </grid>
         </constraints>
-        <properties/>
+        <properties>
+          <font name="JetBrains Mono"/>
+        </properties>
       </component>
       <component id="97886" class="javax.swing.JTextField" binding="textField5" default-binding="true">
         <constraints>
@@ -99,7 +116,9 @@
             <preferred-size width="150" height="-1"/>
           </grid>
         </constraints>
-        <properties/>
+        <properties>
+          <font name="JetBrains Mono"/>
+        </properties>
       </component>
       <component id="c13c1" class="javax.swing.JButton" binding="agregarButton" default-binding="true">
         <constraints>
@@ -107,6 +126,7 @@
         </constraints>
         <properties>
           <background color="-13276874"/>
+          <font name="JetBrains Mono"/>
           <text value="Agregar"/>
         </properties>
       </component>
@@ -116,6 +136,7 @@
         </constraints>
         <properties>
           <background color="-3772149"/>
+          <font name="JetBrains Mono"/>
           <text value="Actualizar"/>
         </properties>
       </component>
@@ -125,6 +146,7 @@
         </constraints>
         <properties>
           <background color="-7664379"/>
+          <font name="JetBrains Mono"/>
           <text value="Eliminar"/>
         </properties>
       </component>
