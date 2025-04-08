@@ -1,10 +1,11 @@
 package Empleados;
 
 import Conexion.ConexionDB;
-import MenuPrincipal.MainMenu;
+import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -59,6 +60,10 @@ public class EmpleadosGUI {
      * Constructor de la interfaz gráfica de empleados.
      * Inicializa los componentes y configura los listeners.
      */
+    public JPanel getMainPanel() {
+        return main; // Return the actual main panel instead of null
+    }
+
     public EmpleadosGUI() {
         obtener_datos();
         ID.setEnabled(false);
@@ -118,15 +123,6 @@ public class EmpleadosGUI {
                 }
             }
         });
-
-        volverButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor(volverButton);
-                jFrame.dispose();
-                MainMenu.main(null);
-            }
-        });
     }
 
     /**
@@ -180,12 +176,19 @@ public class EmpleadosGUI {
      * @param args Argumentos de línea de comandos
      */
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(new FlatArcDarkIJTheme());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         JFrame frame = new JFrame("Gestión de Empleados");
         frame.setContentPane(new EmpleadosGUI().main);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setSize(1006,550);
+        frame.setLocationRelativeTo(null);
         frame.setResizable(false);
     }
 }

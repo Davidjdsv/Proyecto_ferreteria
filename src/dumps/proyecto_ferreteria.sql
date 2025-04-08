@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 31-03-2025 a las 00:00:08
+-- Tiempo de generación: 07-04-2025 a las 08:22:02
 -- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.0.30
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -45,9 +45,8 @@ INSERT INTO `clientes` (`id_cliente`, `nombre`, `telefono`, `direccion`, `correo
 (6, 'Rasputin', '31244421', '3123', 'rasp213@jasdj.com'),
 (7, 'Carlos Pérez', '3123456789', 'Calle 1', 'carlos.perez@example.com'),
 (8, 'Mariana López', '3129876543', 'Avenida Siempre Viva 742', 'mariana.lopez@example.com'),
-(9, 'Andrés García', '3125678901', 'Calle Falsa 123', 'andres.garcia@example.com'),
-(10, 'Sofía Rodríguez', '3124567890', 'Avenida Central 456', 'sofia.rodriguez@example.com'),
-(11, 'Miguel Hernández', '3126789012', 'Calle 2', 'miguel.hernandez@example.com');
+(9, 'Andrés García', '3125678901', 'hhf', 'andres.garcia@example.com'),
+(10, 'Sofía Rodríguez', '3124567890', 'Avenida Central 456', 'sofia.rodriguez@example.com');
 
 -- --------------------------------------------------------
 
@@ -73,7 +72,8 @@ INSERT INTO `empleados` (`id_empleado`, `nombre`, `cargo`, `salario`) VALUES
 (6, 'Ana Torres', 'Cajera', 1000000.00),
 (7, 'Pedro Gómez', 'Vendedor', 1000000.00),
 (8, 'Camila Ramírez', 'Auxiliar de Almacén', 1000000.00),
-(9, 'Jorge Castillo', 'Supervisor', 1000000.00);
+(9, 'Jorge Castillo', 'Administrador', 12.00),
+(11, 'a', 'Gerente', 766.00);
 
 -- --------------------------------------------------------
 
@@ -84,9 +84,9 @@ INSERT INTO `empleados` (`id_empleado`, `nombre`, `cargo`, `salario`) VALUES
 CREATE TABLE `inventario_productos` (
   `id_producto` int(11) NOT NULL,
   `nombre_producto` varchar(50) NOT NULL,
-  `categoria` varchar(50) NOT NULL,
+  `categoria` enum('Herramientas','Tornillos','Tuercas') NOT NULL,
   `cantidad_stock` int(11) NOT NULL,
-  `precio_producto` int(11) NOT NULL,
+  `precio_producto` decimal(10,2) NOT NULL,
   `id_proveedor_asociado` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -95,7 +95,9 @@ CREATE TABLE `inventario_productos` (
 --
 
 INSERT INTO `inventario_productos` (`id_producto`, `nombre_producto`, `categoria`, `cantidad_stock`, `precio_producto`, `id_proveedor_asociado`) VALUES
-(2, 'Cristian', 'Herramienta', 40, 500, 1);
+(2, 'Cristian', 'Herramientas', 0, 500.00, 1),
+(4, 'Cristian', 'Tornillos', 19, 500.00, 1),
+(7, 'h', 'Tornillos', 0, 12.00, 1);
 
 -- --------------------------------------------------------
 
@@ -112,6 +114,36 @@ CREATE TABLE `ordenes_compra` (
   `estado_orden` enum('pendiente','pagada','enviada') NOT NULL,
   `fecha_compra` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `ordenes_compra`
+--
+
+INSERT INTO `ordenes_compra` (`id_orden_compra`, `id_cliente`, `id_empleado`, `id_producto`, `total`, `estado_orden`, `fecha_compra`) VALUES
+(1, 1, 1, 2, 4760.00, 'pagada', '2025-04-04 02:58:53'),
+(2, 1, 1, 2, 4760.00, 'pagada', '2025-04-04 03:00:14'),
+(3, 1, 1, 2, 4760.00, 'pagada', '2025-04-04 03:00:20'),
+(4, 1, 1, 2, 4760.00, 'pagada', '2025-04-04 03:00:30'),
+(5, 10, 4, 2, 1155.00, 'pendiente', '2025-04-04 03:28:52'),
+(6, 1, 1, 2, 1190.00, 'pendiente', '2025-04-04 03:29:40'),
+(7, 1, 1, 2, 595.00, 'pendiente', '2025-04-04 03:31:52'),
+(8, 5, 1, 2, 1785.00, 'pendiente', '2025-04-04 03:36:22'),
+(9, 1, 1, 2, 595.00, 'pendiente', '2025-04-06 04:21:37'),
+(10, 1, 1, 2, 595.00, 'pendiente', '2025-04-06 04:21:59'),
+(11, 1, 1, 2, 595.00, 'pendiente', '2025-04-06 04:22:06'),
+(12, 1, 1, 2, 595.00, 'pendiente', '2025-04-06 04:22:11'),
+(13, 1, 1, 2, 595.00, 'pendiente', '2025-04-06 04:22:25'),
+(14, 1, 1, 2, 1190.00, 'pagada', '2025-04-06 04:22:39'),
+(15, 1, 1, 2, 1190.00, 'pagada', '2025-04-06 04:22:42'),
+(16, 1, 1, 2, 1190.00, 'pagada', '2025-04-06 04:23:04'),
+(17, 1, 1, 2, 1190.00, 'pagada', '2025-04-06 04:23:12'),
+(18, 1, 1, 4, 595.00, 'pendiente', '2025-04-06 04:31:22'),
+(19, 1, 1, 4, 1783.81, 'pendiente', '2025-04-06 04:34:33'),
+(20, 1, 1, 4, 595.00, 'pendiente', '2025-04-06 04:47:55'),
+(21, 1, 1, 4, 7720.72, 'pendiente', '2025-04-06 04:49:50'),
+(23, 1, 1, 4, 595.00, 'pendiente', '2025-04-06 23:40:41'),
+(24, 1, 1, 4, 595.00, 'pendiente', '2025-04-06 23:48:51'),
+(28, 1, 1, 4, 595.00, 'pendiente', '2025-04-07 00:24:49');
 
 -- --------------------------------------------------------
 
@@ -149,10 +181,21 @@ INSERT INTO `proveedores` (`id_proveedor`, `nombre`, `contacto`, `categoria_prod
 CREATE TABLE `registro_ventas` (
   `id_venta` int(11) NOT NULL,
   `id_orden_compra` int(11) NOT NULL,
-  `id_producto` int(11) DEFAULT NULL,
-  `cantidad` int(11) DEFAULT NULL,
-  `sub_total` int(11) NOT NULL
+  `id_producto` int(11) NOT NULL,
+  `cantidad` int(11) NOT NULL,
+  `precio_producto` decimal(10,2) NOT NULL,
+  `sub_total` decimal(10,2) NOT NULL,
+  `fecha_venta` datetime DEFAULT current_timestamp(),
+  `id_cliente` int(11) DEFAULT NULL,
+  `id_empleado` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `registro_ventas`
+--
+
+INSERT INTO `registro_ventas` (`id_venta`, `id_orden_compra`, `id_producto`, `cantidad`, `precio_producto`, `sub_total`, `fecha_venta`, `id_cliente`, `id_empleado`) VALUES
+(1, 28, 4, 1, 500.00, 1.00, '2025-04-06 19:24:49', 1, 1);
 
 --
 -- Índices para tablas volcadas
@@ -197,8 +240,10 @@ ALTER TABLE `proveedores`
 --
 ALTER TABLE `registro_ventas`
   ADD PRIMARY KEY (`id_venta`),
-  ADD KEY `id_orden_compra` (`id_orden_compra`),
-  ADD KEY `fk_id_producto` (`id_producto`);
+  ADD KEY `id_producto` (`id_producto`),
+  ADD KEY `id_cliente` (`id_cliente`),
+  ADD KEY `id_empleado` (`id_empleado`),
+  ADD KEY `id_orden_compra` (`id_orden_compra`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -208,25 +253,25 @@ ALTER TABLE `registro_ventas`
 -- AUTO_INCREMENT de la tabla `clientes`
 --
 ALTER TABLE `clientes`
-  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `empleados`
 --
 ALTER TABLE `empleados`
-  MODIFY `id_empleado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id_empleado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `inventario_productos`
 --
 ALTER TABLE `inventario_productos`
-  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `ordenes_compra`
 --
 ALTER TABLE `ordenes_compra`
-  MODIFY `id_orden_compra` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_orden_compra` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT de la tabla `proveedores`
@@ -238,7 +283,7 @@ ALTER TABLE `proveedores`
 -- AUTO_INCREMENT de la tabla `registro_ventas`
 --
 ALTER TABLE `registro_ventas`
-  MODIFY `id_venta` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_venta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Restricciones para tablas volcadas
@@ -262,8 +307,9 @@ ALTER TABLE `ordenes_compra`
 -- Filtros para la tabla `registro_ventas`
 --
 ALTER TABLE `registro_ventas`
-  ADD CONSTRAINT `fk_id_producto` FOREIGN KEY (`id_producto`) REFERENCES `inventario_productos` (`id_producto`),
-  ADD CONSTRAINT `registro_ventas_ibfk_1` FOREIGN KEY (`id_orden_compra`) REFERENCES `ordenes_compra` (`id_orden_compra`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `registro_ventas_ibfk_1` FOREIGN KEY (`id_producto`) REFERENCES `inventario_productos` (`id_producto`),
+  ADD CONSTRAINT `registro_ventas_ibfk_2` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`),
+  ADD CONSTRAINT `registro_ventas_ibfk_3` FOREIGN KEY (`id_empleado`) REFERENCES `empleados` (`id_empleado`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

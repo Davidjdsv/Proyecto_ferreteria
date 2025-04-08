@@ -1,9 +1,11 @@
 package Clientes;
 
 import Conexion.ConexionDB;
+import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -12,7 +14,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import MenuPrincipal.MainMenu;
 
 public class ClientesGUI {
     private JPanel main;
@@ -33,6 +34,10 @@ public class ClientesGUI {
 
     int filas = 0 ;
 
+
+    public JPanel getMainPanel() {
+        return main; // Return the actual main panel instead of null
+    }
 
     public ClientesGUI() {
         mostrar();
@@ -98,64 +103,59 @@ public class ClientesGUI {
                 }
             }
         });
-
-
-        volverAlMenuButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFrame jFrame = (JFrame) SwingUtilities.getWindowAncestor(volverAlMenuButton);
-                jFrame.dispose();
-
-                MainMenu mainMenu = new MainMenu();
-                mainMenu.main(null);
-            }
-        });
     }
 
-        public void mostrar ()
-        {
-            DefaultTableModel model = new DefaultTableModel();
-            model.addColumn("ID cliente");
-            model.addColumn("Nombre");
-            model.addColumn("Telefono");
-            model.addColumn("Direccion");
-            model.addColumn("Correo");
+    public void mostrar ()
+    {
+        DefaultTableModel model = new DefaultTableModel();
+        model.addColumn("ID cliente");
+        model.addColumn("Nombre");
+        model.addColumn("Telefono");
+        model.addColumn("Direccion");
+        model.addColumn("Correo");
 
-            table1.setModel(model);
-            String[] dato = new String[5];
-            Connection con = ConexionDB.getConnection();
+        table1.setModel(model);
+        String[] dato = new String[5];
+        Connection con = ConexionDB.getConnection();
 
-            try {
-                Statement stat = con.createStatement();
-                String  query = "SELECT * FROM clientes";
-                ResultSet fb = stat.executeQuery(query);
+        try {
+            Statement stat = con.createStatement();
+            String  query = "SELECT * FROM clientes";
+            ResultSet fb = stat.executeQuery(query);
 
-                while (fb.next())
-                {
-                    dato[0] = fb.getString(1);
-                    dato[1] = fb.getString(2);
-                    dato[2] = fb.getString(3);
-                    dato[3] = fb.getString(4);
-                    dato[4] = fb.getString(5);
-                    model.addRow(dato);
-                }
-            }
-            catch (SQLException e)
+            while (fb.next())
             {
-                e.printStackTrace();
+                dato[0] = fb.getString(1);
+                dato[1] = fb.getString(2);
+                dato[2] = fb.getString(3);
+                dato[3] = fb.getString(4);
+                dato[4] = fb.getString(5);
+                model.addRow(dato);
             }
         }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
 
 
 
 
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(new FlatArcDarkIJTheme());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         JFrame frame = new JFrame("Clientes");
         frame.setContentPane(new ClientesGUI().main);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setSize(1006,550);
+        frame.setLocationRelativeTo(null);
         frame.setResizable(false);
     }
 }
