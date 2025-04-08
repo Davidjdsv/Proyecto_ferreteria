@@ -1,22 +1,15 @@
 package Reportes;
 
-import Conexion.ConexionDB;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.sql.*;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
-public class ReportesImplementacion {
+public class ReportesDAO {
     private Connection conexion;
     private JTable reportesTable;
     private DefaultTableModel tableModel;
 
-    public ReportesImplementacion(Connection conexion, JTable reportesTable, DefaultTableModel tableModel) {
+    public ReportesDAO(Connection conexion, JTable reportesTable, DefaultTableModel tableModel) {
         this.conexion = conexion;
         this.reportesTable = reportesTable;
         this.tableModel = tableModel;

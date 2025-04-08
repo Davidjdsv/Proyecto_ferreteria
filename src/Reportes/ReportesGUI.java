@@ -30,7 +30,7 @@ public class ReportesGUI extends JFrame {
 
     private DefaultTableModel tableModel;
     private Connection conexion;
-    private ReportesImplementacion reportesImpl;
+    private ReportesDAO reportesImpl;
 
     public JPanel getMainPanel() {
         return main;
@@ -71,7 +71,7 @@ public class ReportesGUI extends JFrame {
         configurarTabla();
 
         // Inicializar implementación de reportes
-        reportesImpl = new ReportesImplementacion(conexion, reportesTable, tableModel);
+        reportesImpl = new ReportesDAO(conexion, reportesTable, tableModel);
 
         // Configurar botones
         configurarBotones();
@@ -141,6 +141,8 @@ public class ReportesGUI extends JFrame {
         }
     }
 
+    public String nombreEmpleadoCapturado;
+
     private void cargarEmpleados() {
         try {
             // Comprobar si la conexión es nula antes de usarla
@@ -159,10 +161,13 @@ public class ReportesGUI extends JFrame {
             ResultSet rs = stmt.executeQuery();
 
             empleadoComboBox.addItem("Seleccione un empleado");
+            
 
             while (rs.next()) {
                 empleadoComboBox.addItem(rs.getInt("id_empleado") + " - " + rs.getString("nombre"));
             }
+            // capturar nombre seleccionar combox
+            String nombreEmpleadoCapturado = empleadoComboBox.getSelectedItem().toString();
 
             rs.close();
             stmt.close();
@@ -329,11 +334,14 @@ public class ReportesGUI extends JFrame {
                 empleadoSeleccionado = "1 - Sistema"; // Valor por defecto
             }
 
+
             int idEmpleado = Integer.parseInt(empleadoSeleccionado.split(" - ")[0]);
-            String descripcion = "Reporte generado: " + tipoReporte;
+            String descripcion = "Reporte generado: " + tipoReporte + " por el empleado: " + nombreEmpleadoCapturado;
+
+            System.out.println("Empleado seleccionado: " + nombreEmpleadoCapturado);
 
             if (!descripcionTextArea.getText().trim().isEmpty()) {
-                descripcion += ". Notas: " + descripcionTextArea.getText();
+                descripcion += ". Generado por  " + descripcionTextArea.getText();
             }
 
             PreparedStatement stmt = conexion.prepareStatement(
