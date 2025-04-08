@@ -55,6 +55,25 @@ public class MenuPrueba {
             mainPanel.repaint();
         });
 
+        // Cargar imagen en lblWelcomeImage
+        try {
+            // Obtener el tamaño del JLabel
+            int lblWidth = lblWelcomeImage.getWidth();
+            int lblHeight = lblWelcomeImage.getHeight();
+            // Cargar la imagen desde el archivo
+            ImageIcon imagenFondo = new ImageIcon("Resources/Img/fondo_ferreteria.jpg");
+            // Redimensionar la imagen si es necesario
+            Image img = imagenFondo.getImage();
+            // Ajustar al tamaño que necesites (puedes ajustar estos valores)
+            Image imgRedimensionada = img.getScaledInstance(1000, 450, Image.SCALE_SMOOTH);
+            ImageIcon iconoRedimensionado = new ImageIcon(imgRedimensionada);
+
+            lblWelcomeImage.setIcon(iconoRedimensionado);
+        } catch (Exception e) {
+            System.err.println("Error al cargar la imagen: " + e.getMessage());
+            e.printStackTrace();
+        }
+
         // Configurar ActionListeners para cada botón
         setupButtonActions();
     }
