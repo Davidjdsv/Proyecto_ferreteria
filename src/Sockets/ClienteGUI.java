@@ -1,7 +1,5 @@
 package Sockets;
 
-import Clientes.ClientesGUI;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,7 +12,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class ClienteGUI {
-    private JPanel main;
+    public JPanel mainPanel;
     private JTextField textField1;
     private JButton enviarButton;
     private JButton conectarButton;
@@ -115,7 +113,7 @@ public class ClienteGUI {
     public static void main(String[] args) {
         JFrame frame = new JFrame("Cliente chat");
         ClienteGUI clienteGUI = new ClienteGUI();
-        frame.setContentPane(clienteGUI.main);
+        frame.setContentPane(clienteGUI.mainPanel);
         //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // Comentado por alguna razón
         frame.pack();
         frame.setSize(600, 400);

@@ -7,6 +7,7 @@ import Orden_Compras.OrdenesCompraGUI;
 import Proveedores.ProveedoresGUI;
 import Reportes.ReportesGUI;
 import VentasGUI.VentasGUI;
+import Sockets.ClienteGUI;
 import Conexion.ConexionDB;
 
 import javax.swing.*;
@@ -34,6 +35,7 @@ public class MenuPrueba {
     public JButton btnReportes;
     public JButton btnToggleMenu;
     public JLabel lblWelcomeImage;
+    private JButton chatButton;
 
     private boolean menuVisible = true;
     private Map<String, JPanel> panelCache = new HashMap<>();
@@ -65,6 +67,7 @@ public class MenuPrueba {
         btnOrdenesCompra.addActionListener(e -> cargarPanel("OrdenesCompra", OrdenesCompraGUI.class));
         btnVender.addActionListener(e -> cargarPanel("Ventas", VentasGUI.class));
         btnReportes.addActionListener(e -> cargarPanel("Reportes", ReportesGUI.class));
+        chatButton.addActionListener(e -> cargarPanel("Chat", ClienteGUI.class));
     }
 
     private void cargarPanel(String nombre, Class<?> guiClass) {

@@ -17,7 +17,7 @@ public class ConexionDB {
     public static Connection getConnection(){
         Connection con = null;
         try {
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/proyecto_ferreteria", "root", "");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/proyecto_ferreteria_v2", "root", "");
             System.out.println("Conexión exitosa a la base de datos.");
         } catch (SQLException e) {
             System.out.println("Error en la conexión: " + e.getMessage());
