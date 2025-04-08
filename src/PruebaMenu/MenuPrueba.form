@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="PruebaMenu.MenuPrueba.MenuPrueba.MenuPrueba">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="PruebaMenu.MenuPrueba">
   <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="0">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
@@ -13,7 +13,7 @@
     </properties>
     <border type="none"/>
     <children>
-      <grid id="a45d5" binding="menuPanel" layout-manager="GridLayoutManager" row-count="10" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="10">
+      <grid id="a45d5" binding="menuPanel" layout-manager="GridLayoutManager" row-count="11" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="10">
         <margin top="15" left="10" bottom="15" right="0"/>
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false">
@@ -27,7 +27,7 @@
         <children>
           <component id="21435" class="javax.swing.JLabel" binding="lblTitulo">
             <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <font name="JetBrains Mono" size="22" style="1"/>
@@ -37,7 +37,7 @@
           </component>
           <component id="ca903" class="javax.swing.JButton" binding="btnInventario">
             <constraints>
-              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <background color="-15066598"/>
@@ -53,7 +53,7 @@
           </component>
           <component id="4a1d5" class="javax.swing.JButton" binding="btnClientes">
             <constraints>
-              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <background color="-15066598"/>
@@ -69,7 +69,7 @@
           </component>
           <component id="b6dea" class="javax.swing.JButton" binding="btnEmpleados">
             <constraints>
-              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="4" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <background color="-15066598"/>
@@ -85,7 +85,7 @@
           </component>
           <component id="5e38a" class="javax.swing.JButton" binding="btnProveedores">
             <constraints>
-              <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="5" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <background color="-15066598"/>
@@ -101,7 +101,7 @@
           </component>
           <component id="d2cca" class="javax.swing.JButton" binding="btnOrdenesCompra">
             <constraints>
-              <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="6" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <background color="-15066598"/>
@@ -117,17 +117,17 @@
           </component>
           <vspacer id="73fc1">
             <constraints>
-              <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+              <grid row="10" column="0" row-span="1" col-span="2" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
             </constraints>
           </vspacer>
           <vspacer id="19b03">
             <constraints>
-              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+              <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
             </constraints>
           </vspacer>
           <component id="4d72a" class="javax.swing.JButton" binding="btnVender">
             <constraints>
-              <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="7" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <background color="-15066598"/>
@@ -143,7 +143,7 @@
           </component>
           <component id="1f5e2" class="javax.swing.JButton" binding="btnReportes">
             <constraints>
-              <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="8" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <background color="-15066598"/>
@@ -155,6 +155,18 @@
               <iconTextGap value="10"/>
               <margin top="2" left="15" bottom="2" right="2"/>
               <text value="Reportes"/>
+            </properties>
+          </component>
+          <component id="f7b70" class="javax.swing.JButton" binding="chatButton" default-binding="true">
+            <constraints>
+              <grid row="9" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <background color="-15066598"/>
+              <font name="JetBrains Mono" size="14"/>
+              <foreground color="-458761"/>
+              <horizontalAlignment value="2"/>
+              <text value="Chat"/>
             </properties>
           </component>
         </children>

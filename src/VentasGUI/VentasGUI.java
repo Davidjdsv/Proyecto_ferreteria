@@ -1,7 +1,7 @@
 package VentasGUI;
 
 import Conexion.ConexionDB;
-import MenuPrincipal.MainMenu;
+//import MenuPrincipal.MainMenu;
 import Orden_Compras.OrdenesCompraDAO;
 import Inventario.InventarioDAO;
 import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
