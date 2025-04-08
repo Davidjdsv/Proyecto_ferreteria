@@ -1,3 +1,6 @@
+/**
+ * Paquete que contiene las clases relacionadas con la generación y gestión de reportes.
+ */
 package Reportes;
 
 import Conexion.ConexionDB;
@@ -12,31 +15,73 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Interfaz gráfica para la gestión de reportes del sistema de ferretería.
+ * Permite generar diferentes tipos de reportes, visualizarlos en una tabla
+ * y exportarlos a formato PDF.
+ *
+ * Esta clase utiliza la biblioteca Swing para la interfaz gráfica y JDBC para
+ * la conexión a la base de datos.
+ *
+ * @author Cristian Restrepo
+ * @version 1.0
+ */
 
 public class ReportesGUI extends JFrame {
+    /** Panel principal de la interfaz */
     private JPanel main;
+    /** Selector de tipo de reporte */
     private JComboBox<String> tipoReporteComboBox;
+    /** Campo de texto para mostrar la fecha actual */
     private JTextField fechaTextField;
+    /** Selector de empleado que genera el reporte */
     private JComboBox<String> empleadoComboBox;
+    /** Área de texto para la descripción del reporte */
     private JTextArea descripcionTextArea;
+    /** Botón para generar el reporte seleccionado */
     private JButton generarReporteButton;
+    /** Botón para limpiar el formulario */
     private JButton limpiarButton;
+    /** Tabla para mostrar los reportes generados */
     private JTable reportesTable;
+    /** Botón para volver a la pantalla anterior */
     private JButton regresarButton;
+    /** Botón para salir de la aplicación */
     private JButton salirButton;
+    /** Botón para exportar el reporte actual a PDF */
     private JButton exportarPDFButton;
+    /** Selector numérico para parámetros específicos de reportes */
     private JSpinner parametroSpinner;
+    /** Etiqueta descriptiva para el spinner de parámetros */
     private JLabel parametroLabel;
 
+    /** Modelo de tabla para los reportes */
     private DefaultTableModel tableModel;
+    /** Conexión a la base de datos */
     private Connection conexion;
+    /** Implementación de la lógica de reportes */
     private ReportesDAO reportesImpl;
 
+    /** Mapa para almacenar ID y nombre completo de empleados */
+    private Map<Integer, String> empleadosMap = new HashMap<>();
+    /** Nombre del empleado actualmente seleccionado */
+    private String nombreEmpleadoSeleccionado = "";
+
+    /**
+     * Obtiene el panel principal de la interfaz.
+     * @return Panel principal de la interfaz gráfica
+     */
     public JPanel getMainPanel() {
         return main;
     }
 
-    // Constructor sin argumentos que obtiene la conexión internamente
+    /**
+     * Constructor sin argumentos que obtiene la conexión internamente.
+     * Utiliza la clase ConexionDB para establecer la conexión con la base de datos.
+     */
     public ReportesGUI() {
         this(ConexionDB.getConnection());
 
@@ -47,6 +92,10 @@ public class ReportesGUI extends JFrame {
         }
     }
 
+    /**
+     * Constructor que recibe una conexión a la base de datos.
+     * @param conexion Conexión a la base de datos
+     */
     public ReportesGUI(Connection conexion) {
         // Asignar correctamente el parámetro de conexión al campo de la clase
         this.conexion = conexion;
@@ -76,9 +125,22 @@ public class ReportesGUI extends JFrame {
         // Configurar botones
         configurarBotones();
 
+        // Configurar la detección del cambio de selección en el combobox de empleados
+        empleadoComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actualizarNombreEmpleadoSeleccionado();
+                actualizarDescripcionAutomatica();
+            }
+        });
+
         setVisible(true);
     }
 
+    /**
+     * Inicializa los componentes de la interfaz gráfica.
+     * Configura los tipos de reportes disponibles y los parámetros específicos.
+     */
     private void inicializarComponentes() {
         // Configurar tipos de reportes disponibles
         if (tipoReporteComboBox.getItemCount() == 0) {
@@ -105,10 +167,15 @@ public class ReportesGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String tipoSeleccionado = (String) tipoReporteComboBox.getSelectedItem();
                 actualizarParametrosPorTipoReporte(tipoSeleccionado);
+                actualizarDescripcionAutomatica();
             }
         });
     }
 
+    /**
+     * Actualiza la visibilidad y configuración de los parámetros según el tipo de reporte seleccionado.
+     * @param tipoReporte Tipo de reporte seleccionado
+     */
     private void actualizarParametrosPorTipoReporte(String tipoReporte) {
         if (parametroLabel == null || parametroSpinner == null) {
             return; // Evitar NullPointerException si no están inicializados
@@ -141,8 +208,9 @@ public class ReportesGUI extends JFrame {
         }
     }
 
-    public String nombreEmpleadoCapturado;
-
+    /**
+     * Carga la lista de empleados desde la base de datos al ComboBox de empleados.
+     */
     private void cargarEmpleados() {
         try {
             // Comprobar si la conexión es nula antes de usarla
@@ -160,14 +228,16 @@ public class ReportesGUI extends JFrame {
             PreparedStatement stmt = conexion.prepareStatement("SELECT id_empleado, nombre FROM empleados ORDER BY nombre");
             ResultSet rs = stmt.executeQuery();
 
+            empleadoComboBox.removeAllItems();
             empleadoComboBox.addItem("Seleccione un empleado");
-            
+            empleadosMap.clear();
 
             while (rs.next()) {
-                empleadoComboBox.addItem(rs.getInt("id_empleado") + " - " + rs.getString("nombre"));
+                int idEmpleado = rs.getInt("id_empleado");
+                String nombreEmpleado = rs.getString("nombre");
+                empleadoComboBox.addItem(idEmpleado + " - " + nombreEmpleado);
+                empleadosMap.put(idEmpleado, nombreEmpleado);
             }
-            // capturar nombre seleccionar combox
-            String nombreEmpleadoCapturado = empleadoComboBox.getSelectedItem().toString();
 
             rs.close();
             stmt.close();
@@ -177,6 +247,57 @@ public class ReportesGUI extends JFrame {
         }
     }
 
+    /**
+     * Actualiza el nombre del empleado seleccionado basado en la selección del ComboBox.
+     */
+    private void actualizarNombreEmpleadoSeleccionado() {
+        String seleccion = (String) empleadoComboBox.getSelectedItem();
+        if (seleccion != null && !seleccion.equals("Seleccione un empleado")) {
+            try {
+                int idEmpleado = Integer.parseInt(seleccion.split(" - ")[0]);
+                nombreEmpleadoSeleccionado = empleadosMap.get(idEmpleado);
+                if (nombreEmpleadoSeleccionado == null) {
+                    nombreEmpleadoSeleccionado = seleccion.split(" - ")[1]; // Fallback
+                }
+            } catch (Exception e) {
+                nombreEmpleadoSeleccionado = "";
+                System.out.println("Error al obtener nombre de empleado: " + e.getMessage());
+            }
+        } else {
+            nombreEmpleadoSeleccionado = "";
+        }
+    }
+
+    /**
+     * Actualiza automáticamente la descripción del reporte basado en las selecciones actuales.
+     */
+    private void actualizarDescripcionAutomatica() {
+        String tipoReporte = (String) tipoReporteComboBox.getSelectedItem();
+        if (tipoReporte != null && !tipoReporte.equals("Seleccione un tipo de reporte")) {
+            StringBuilder descripcion = new StringBuilder("Reporte ");
+            descripcion.append(tipoReporte);
+
+            if (!nombreEmpleadoSeleccionado.isEmpty()) {
+                descripcion.append(" generado por ").append(nombreEmpleadoSeleccionado);
+            }
+
+            // Añadir parámetros específicos según el tipo de reporte
+            if (parametroSpinner.isVisible()) {
+                int valor = (Integer) parametroSpinner.getValue();
+                if (tipoReporte.equals("Stock Bajo")) {
+                    descripcion.append(". Umbral de stock: ").append(valor);
+                } else {
+                    descripcion.append(". Límite: ").append(valor).append(" registros");
+                }
+            }
+
+            descripcionTextArea.setText(descripcion.toString());
+        }
+    }
+
+    /**
+     * Configura el modelo de la tabla de reportes con sus columnas iniciales.
+     */
     private void configurarTabla() {
         tableModel = new DefaultTableModel();
         // Columnas iniciales, se actualizarán según el tipo de reporte
@@ -189,6 +310,9 @@ public class ReportesGUI extends JFrame {
         reportesTable.setModel(tableModel);
     }
 
+    /**
+     * Carga los reportes generados desde la base de datos a la tabla.
+     */
     private void cargarReportes() {
         tableModel.setRowCount(0);
 
@@ -233,6 +357,9 @@ public class ReportesGUI extends JFrame {
         }
     }
 
+    /**
+     * Configura los listeners de los botones de la interfaz.
+     */
     private void configurarBotones() {
         generarReporteButton.addActionListener(new ActionListener() {
             @Override
@@ -245,6 +372,9 @@ public class ReportesGUI extends JFrame {
                             "Advertencia", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
+
+                // Asegurarse de que nombreEmpleadoSeleccionado esté actualizado
+                actualizarNombreEmpleadoSeleccionado();
 
                 switch (tipoReporte) {
                     case "Ventas Diarias":
@@ -300,7 +430,11 @@ public class ReportesGUI extends JFrame {
                     return;
                 }
 
-                reportesImpl.exportarReporteActualAPDF(tipoReporte);
+                // Asegurarse de que nombreEmpleadoSeleccionado esté actualizado
+                actualizarNombreEmpleadoSeleccionado();
+
+                // Llamar al método exportar con el nombre del empleado
+                reportesImpl.exportarReporteActualAPDF(tipoReporte, nombreEmpleadoSeleccionado);
             }
         });
 
@@ -320,6 +454,10 @@ public class ReportesGUI extends JFrame {
         });
     }
 
+    /**
+     * Guarda un registro del reporte generado en la base de datos.
+     * @param tipoReporte Tipo de reporte que se generó
+     */
     private void guardarRegistroReporte(String tipoReporte) {
         try {
             if (conexion == null) {
@@ -329,110 +467,90 @@ public class ReportesGUI extends JFrame {
                 }
             }
 
+            // Obtener ID del empleado
+            int idEmpleado = 0;
             String empleadoSeleccionado = (String) empleadoComboBox.getSelectedItem();
-            if (empleadoSeleccionado == null || empleadoSeleccionado.equals("Seleccione un empleado")) {
-                empleadoSeleccionado = "1 - Sistema"; // Valor por defecto
+            if (empleadoSeleccionado != null && !empleadoSeleccionado.equals("Seleccione un empleado")) {
+                idEmpleado = Integer.parseInt(empleadoSeleccionado.split(" - ")[0]);
             }
 
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String fecha = sdf.format(new Date());
+            String descripcion = descripcionTextArea.getText();
 
-            int idEmpleado = Integer.parseInt(empleadoSeleccionado.split(" - ")[0]);
-            String descripcion = "Reporte generado: " + tipoReporte + " por el empleado: " + nombreEmpleadoCapturado;
-
-            System.out.println("Empleado seleccionado: " + nombreEmpleadoCapturado);
-
-            if (!descripcionTextArea.getText().trim().isEmpty()) {
-                descripcion += ". Generado por  " + descripcionTextArea.getText();
-            }
-
-            PreparedStatement stmt = conexion.prepareStatement(
-                    "INSERT INTO reportes_generados (tipo_reporte, id_empleado, descripcion) VALUES (?, ?, ?)");
+            String sql = "INSERT INTO reportes_generados (tipo_reporte, fecha_compra, id_empleado, descripcion) VALUES (?, ?, ?, ?)";
+            PreparedStatement stmt = conexion.prepareStatement(sql);
             stmt.setString(1, tipoReporte);
-            stmt.setInt(2, idEmpleado);
-            stmt.setString(3, descripcion);
+            stmt.setString(2, fecha);
+            stmt.setInt(3, idEmpleado);
+            stmt.setString(4, descripcion);
 
-            stmt.executeUpdate();
+            int result = stmt.executeUpdate();
             stmt.close();
 
+            if (result > 0) {
+                System.out.println("Registro de reporte guardado correctamente");
+                // Opcionalmente refrescar la lista de reportes
+                // cargarReportes();
+            }
         } catch (SQLException e) {
             System.out.println("Error al guardar registro de reporte: " + e.getMessage());
+            // No mostrar mensaje al usuario para no interrumpir el flujo
         }
     }
 
-    private void generarReporte() {
-        String tipoReporte = (String) tipoReporteComboBox.getSelectedItem();
-        String empleadoSeleccionado = (String) empleadoComboBox.getSelectedItem();
-        String descripcion = descripcionTextArea.getText();
-
-        if (empleadoSeleccionado == null || empleadoSeleccionado.equals("Seleccione un empleado")) {
-            JOptionPane.showMessageDialog(this, "Por favor seleccione un empleado",
-                    "Error", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        if (descripcion.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Por favor ingrese una descripción",
-                    "Error", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        // Extraer ID de empleado
-        int idEmpleado = Integer.parseInt(empleadoSeleccionado.split(" - ")[0]);
-
-        try {
-            // Comprobar si la conexión es nula antes de usarla
-            if (conexion == null) {
-                System.out.println("La conexión es nula en generarReporte()");
-                conexion = ConexionDB.getConnection();
-                if (conexion == null) {
-                    JOptionPane.showMessageDialog(this,
-                            "No se pudo establecer conexión con la base de datos.",
-                            "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-            }
-
-            PreparedStatement stmt = conexion.prepareStatement(
-                    "INSERT INTO reportes_generados (tipo_reporte, id_empleado, descripcion) VALUES (?, ?, ?)");
-            stmt.setString(1, tipoReporte);
-            stmt.setInt(2, idEmpleado);
-            stmt.setString(3, descripcion);
-
-            int filasAfectadas = stmt.executeUpdate();
-
-            if (filasAfectadas > 0) {
-                JOptionPane.showMessageDialog(this, "Reporte generado correctamente",
-                        "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                cargarReportes();
-                limpiarFormulario();
-            } else {
-                JOptionPane.showMessageDialog(this, "No se pudo generar el reporte",
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
-
-            stmt.close();
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error al generar reporte: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
+    /**
+     * Limpia el formulario y restablece los valores predeterminados.
+     */
     private void limpiarFormulario() {
         tipoReporteComboBox.setSelectedIndex(0);
         empleadoComboBox.setSelectedIndex(0);
         descripcionTextArea.setText("");
+        parametroSpinner.setValue(5);
+        parametroLabel.setVisible(false);
+        parametroSpinner.setVisible(false);
+
+        // Actualizar la fecha actual
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         fechaTextField.setText(dateFormat.format(new Date()));
+
+        // Limpiar la tabla
+        if (tableModel != null) {
+            tableModel.setRowCount(0);
+        }
+
+        nombreEmpleadoSeleccionado = "";
     }
 
+    /**
+     * Genera un reporte personalizado (funcionalidad en desarrollo).
+     */
+    private void generarReporte() {
+        // Este método implementaría la generación de reportes personalizados
+        // Por ejemplo, podría abrir un diálogo adicional para configurar parámetros específicos
+        JOptionPane.showMessageDialog(this,
+                "La funcionalidad de reportes personalizados está en desarrollo.\n" +
+                        "Por favor, seleccione otro tipo de reporte.",
+                "Información", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * Método principal que inicia la aplicación.
+     * @param args Argumentos de línea de comandos (no utilizados)
+     */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            Connection conexion = ConexionDB.getConnection();
-            if (conexion != null) {
-                new ReportesGUI(conexion);
-            } else {
-                JOptionPane.showMessageDialog(null,
-                        "No se pudo establecer conexión con la base de datos.",
-                        "Error", JOptionPane.ERROR_MESSAGE);
+        try {
+            // Aplicar Look and Feel del sistema para que la aplicación se vea más nativa
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Ejecutar la aplicación
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new ReportesGUI();
             }
         });
     }
