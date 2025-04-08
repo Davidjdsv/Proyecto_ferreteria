@@ -1,8 +1,7 @@
 package VentasGUI;
 
 import Conexion.ConexionDB;
-import MenuPrincipal.MainMenu;
-import Orden_Compras.OrdenesCompraDAO;
+import Orden_Compras.OrdenesCompraGUI;
 import Inventario.InventarioDAO;
 import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 
@@ -13,58 +12,115 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Clase que implementa la interfaz gráfica de usuario para la gestión de ventas.
+ * Permite realizar operaciones como buscar productos, agregarlos a una venta,
+ * calcular subtotales, gestionar clientes y empleados, y registrar ventas en la base de datos.
+ *
+ * @author Cristian Restrepo
+ * @version 1.0
+ */
 public class VentasGUI extends JFrame {
+    /** Campo de texto para buscar productos */
     private JTextField buscador;
+    /** Botón para seleccionar productos de la tabla */
     private JButton clickParaSeleccionarButton;
+    /** Tabla que muestra los productos disponibles */
     private JTable datosproducto;
+    /** Panel para mostrar clientes disponibles */
     private JPanel Clientesdisponible;
+    /** Campo de texto auxiliar 2 */
     private JTextField textField2;
+    /** Campo de texto auxiliar 3 */
     private JTextField textField3;
+    /** Campo de texto auxiliar 4 */
     private JTextField textField4;
+    /** Control para seleccionar cantidades */
     private JSpinner spinner1;
+    /** Panel para mostrar precio y cantidad */
     private JPanel preciocantidad;
+    /** Campo de texto para ingresar cantidad de venta */
     private JTextField cant_venta;
+    /** Botón para agregar producto a la venta */
     private JButton agregarProductoButton;
+    /** Panel principal de la interfaz */
     private JPanel main;
+    /** Campo de texto para mostrar subtotal */
     private JTextField subtotalf;
+    /** Botón para eliminar producto de la venta */
     private JButton eliminarButton;
+    /** Tabla que muestra los productos agregados a la venta */
     private JTable productosventa;
+    /** Campo de texto auxiliar 8 para total */
     private JTextField textField8;
+    /** Botón para finalizar la venta */
     private JButton cobrarButton;
+    /** Panel de desplazamiento para buscar productos */
     private JScrollPane buscarproducto;
+    /** Panel de desplazamiento para datos de venta */
     private JScrollPane datoventa;
+    /** Campo de texto auxiliar 1 */
     private JTextField textField1;
+    /** Panel para mostrar el producto elegido */
     private JPanel producto_elegido;
+    /** Campo de texto para buscar cliente */
     private JTextField buscarcliente;
+    /** Campo de texto para mostrar cédula del cliente */
     private JTextField Ccedula;
+    /** Panel para información del cliente */
     private JPanel infoc;
+    /** Campo de texto para mostrar fecha actual */
     private JTextField calendario;
+    /** Campo de texto para mostrar nombre del empleado */
     private JTextField nombreE;
+    /** Campo de texto para id del empleado */
     private JTextField idempleado;
+    /** Selector para estado de la orden */
     private JComboBox<String> estado1;
+    /** Campo de texto para id del cliente */
     private JTextField idcliente;
+    /** Botón para volver a la pantalla anterior */
     private JButton volverButton;
 
+    /** Contador de filas */
     int filas = 0;
+    /** Total monetario */
     double totalm = 0;
+    /** Total con IVA */
     double totalconiva = 0;
+    /** Porcentaje de IVA */
     double IVA = 0.19;
 
+    /** Objeto para acceder a operaciones de inventario */
     InventarioDAO inventarioDAO = new InventarioDAO();
-    OrdenesCompraDAO detalleOrdenDAO = new OrdenesCompraDAO();
+    /** Objeto para acceder a operaciones de órdenes de compra */
+    OrdenesCompraGUI detalleOrdenDAO = new OrdenesCompraGUI();
+    /** Cadena para búsqueda de cliente */
     private String buscar_cliente;
 
+    /**
+     * Obtiene el panel principal de la interfaz
+     *
+     * @return El panel principal
+     */
     public JPanel getMainPanel() {
         return main;
     }
 
-    // Constructor similar al de MainMenu
+    /**
+     * Constructor de la clase VentasGUI
+     * Inicializa los componentes y configura los oyentes de eventos
+     */
     public VentasGUI() {
         initComponents();
         setupEventListeners();
     }
 
-    // Inicializar componentes
+    /**
+     * Inicializa los componentes de la interfaz gráfica
+     * Configura la fecha actual, obtiene los datos de productos,
+     * y establece propiedades básicas de la ventana
+     */
     private void initComponents() {
         // Configuración de la fecha actual
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -103,7 +159,10 @@ public class VentasGUI extends JFrame {
         productosventa.setModel(model);
     }
 
-    // Configurar listeners de eventos
+    /**
+     * Configura los oyentes de eventos para los componentes de la interfaz
+     * Maneja eventos de botones, campos de texto y tablas
+     */
     private void setupEventListeners() {
         // Listener para el botón de seleccionar producto
         clickParaSeleccionarButton.addActionListener(e -> agregar_datos_p2());
@@ -159,6 +218,12 @@ public class VentasGUI extends JFrame {
 
         // Listener para selección de producto en la tabla
         datosproducto.addMouseListener(new MouseAdapter() {
+            /**
+             * Maneja el evento de clic en la tabla de productos
+             * Actualiza los campos de texto con la información del producto seleccionado
+             *
+             * @param e El evento de ratón
+             */
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
@@ -221,6 +286,12 @@ public class VentasGUI extends JFrame {
 
         // Listener para buscar productos
         buscador.addKeyListener(new KeyAdapter() {
+            /**
+             * Maneja el evento de liberación de tecla en el campo de búsqueda
+             * Actualiza la tabla de productos según el texto ingresado
+             *
+             * @param e El evento de teclado
+             */
             @Override
             public void keyReleased(KeyEvent e) {
                 obtener_datos_producto();
@@ -333,7 +404,13 @@ public class VentasGUI extends JFrame {
         }
     }
 
-    // Validar campos antes de agregar producto
+    /**
+     * Valida los campos antes de agregar un producto a la venta
+     * Verifica que se haya seleccionado un producto, que la cantidad sea válida
+     * y que haya suficiente stock disponible
+     *
+     * @return true si los campos son válidos, false en caso contrario
+     */
     private boolean validarCamposProducto() {
         if (textField2.getText().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Seleccione un producto", "Error", JOptionPane.ERROR_MESSAGE);
@@ -368,7 +445,12 @@ public class VentasGUI extends JFrame {
         return true;
     }
 
-    // Validar campos antes de cobrar
+    /**
+     * Valida los campos antes de finalizar la venta
+     * Verifica que se haya ingresado un cliente y un empleado, y que haya productos en la venta
+     *
+     * @return true si los campos son válidos, false en caso contrario
+     */
     private boolean validarCamposCobro() {
         if (idcliente.getText().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Ingrese el ID del cliente", "Error", JOptionPane.ERROR_MESSAGE);
@@ -388,7 +470,10 @@ public class VentasGUI extends JFrame {
         return true;
     }
 
-    // Limpiar todos los campos del formulario
+    /**
+     * Limpia todos los campos del formulario y reinicia el total
+     * Se utiliza después de completar una venta
+     */
     private void limpiarFormulario() {
         textField2.setText("");
         textField3.setText("");
@@ -411,7 +496,9 @@ public class VentasGUI extends JFrame {
         obtener_datos_producto();
     }
 
-    // Método para limpiar campos después de agregar producto
+    /**
+     * Limpia los campos relacionados con el producto después de agregarlo a la venta
+     */
     public void clear() {
         textField2.setText("");
         textField3.setText("");
@@ -421,10 +508,13 @@ public class VentasGUI extends JFrame {
         subtotalf.setText("");
     }
 
-    // Conexión a base de datos
+    /** Objeto para conexión a la base de datos */
     ConexionDB conexionBD = new ConexionDB();
 
-    // Obtener datos de productos para mostrar en la tabla
+    /**
+     * Obtiene los datos de productos de la base de datos y los muestra en la tabla
+     * Permite filtrar por nombre de producto
+     */
     public void obtener_datos_producto() {
         DefaultTableModel model = new DefaultTableModel();
 
@@ -479,7 +569,11 @@ public class VentasGUI extends JFrame {
         }
     }
 
-    // Agregar datos de productos a la tabla de venta
+    /**
+     * Agrega un producto a la tabla de venta
+     * Si el producto ya existe, actualiza la cantidad y el subtotal
+     * Si es nuevo, agrega una nueva fila
+     */
     public void agregar_datos_p() {
         DefaultTableModel model = (DefaultTableModel) productosventa.getModel();
 
@@ -530,7 +624,13 @@ public class VentasGUI extends JFrame {
         actualizarInventario(Integer.parseInt(dato[0]), Integer.parseInt(dato[2]));
     }
 
-    // Método para actualizar el inventario después de una venta
+    /**
+     * Actualiza el inventario después de agregar un producto a la venta
+     * Reduce la cantidad disponible del producto
+     *
+     * @param idProducto El ID del producto
+     * @param cantidadVendida La cantidad vendida
+     */
     public void actualizarInventario(int idProducto, int cantidadVendida) {
         Connection con = conexionBD.getConnection();
         PreparedStatement stmt = null;
@@ -563,7 +663,13 @@ public class VentasGUI extends JFrame {
         }
     }
 
-    // Método para restaurar el inventario cuando se elimina un producto de la venta
+    /**
+     * Restaura el inventario cuando se elimina un producto de la venta
+     * Aumenta la cantidad disponible del producto
+     *
+     * @param idProducto El ID del producto
+     * @param cantidad La cantidad a restaurar
+     */
     public void restaurarInventario(int idProducto, int cantidad) {
         Connection con = conexionBD.getConnection();
         PreparedStatement stmt = null;
@@ -595,7 +701,10 @@ public class VentasGUI extends JFrame {
         }
     }
 
-    // Método para agregar producto seleccionado a los campos de texto
+    /**
+     * Agrega el producto seleccionado en la tabla a los campos de texto
+     * Se utiliza cuando se hace clic en el botón de seleccionar producto
+     */
     public void agregar_datos_p2() {
         if (datosproducto.getRowCount() > 0) {
             int selectFila = datosproducto.getSelectedRow();
@@ -612,7 +721,9 @@ public class VentasGUI extends JFrame {
         }
     }
 
-    // Buscar cliente por ID
+    /**
+     * Busca un cliente por su ID en la base de datos y muestra su información
+     */
     public void buscar_cliente() {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -657,7 +768,19 @@ public class VentasGUI extends JFrame {
         }
     }
 
-    // Buscar empleado por ID
+    /**
+     * Busca un empleado por su ID en la base de datos y muestra su nombre
+     */
+    /**
+     * Busca un empleado en la base de datos utilizando el ID proporcionado en el campo idempleado.
+     * Si encuentra el empleado, muestra su nombre en el campo nombreE.
+     * Si no lo encuentra, muestra un mensaje de error y limpia el campo nombreE.
+     *
+     * El método establece una conexión con la base de datos, prepara y ejecuta una consulta SQL
+     * para obtener el nombre del empleado basándose en su ID, y maneja posibles excepciones.
+     *
+     * @throws SQLException Si ocurre un error durante la conexión o consulta a la base de datos
+     */
     public void buscar_empleado() {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -698,7 +821,17 @@ public class VentasGUI extends JFrame {
         }
     }
 
-    // Calcular subtotal con IVA
+    /**
+     * Calcula el subtotal de una venta incluyendo el IVA.
+     * Utiliza los valores ingresados en los campos textField4 (precio) y cant_venta (cantidad).
+     * Calcula el total multiplicando precio por cantidad, calcula el IVA correspondiente,
+     * y actualiza los campos subtotalf y textField8 con los resultados.
+     *
+     * El método verifica que los campos necesarios no estén vacíos antes de realizar los cálculos.
+     * También actualiza la variable totalm sumándole el total con IVA de la venta actual.
+     *
+     * @throws NumberFormatException Si los valores ingresados no pueden convertirse a números
+     */
     public void psubtotal() {
         if (!textField4.getText().isEmpty() && !cant_venta.getText().isEmpty()) {
             try {
@@ -720,7 +853,13 @@ public class VentasGUI extends JFrame {
         }
     }
 
-    // Método principal para ejecutar la aplicación
+    /**
+     * Método principal para ejecutar la aplicación.
+     * Establece el tema visual FlatArcDarkIJTheme para la interfaz gráfica y
+     * inicia la aplicación creando una instancia de VentasGUI.
+     *
+     * @param args Argumentos de línea de comandos (no se utilizan)
+     */
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(new FlatArcDarkIJTheme());
@@ -734,3 +873,4 @@ public class VentasGUI extends JFrame {
         });
     }
 }
+
