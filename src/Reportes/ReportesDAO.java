@@ -3,19 +3,55 @@ package Reportes;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.sql.*;
+import java.io.FileOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.BaseColor;
+
+/**
+ * Clase que maneja la generación y exportación de reportes del sistema de ferretería.
+ * Permite generar diferentes tipos de reportes y exportarlos a PDF.
+ *
+ * @author Cristian Restrepo
+ * @version 1.0
+ */
 public class ReportesDAO {
     private Connection conexion;
     private JTable reportesTable;
     private DefaultTableModel tableModel;
 
+    /**
+     * Constructor de la clase ReportesDAO.
+     *
+     * @param conexion Conexión a la base de datos
+     * @param reportesTable Tabla donde se mostrarán los reportes
+     * @param tableModel Modelo de tabla para los datos
+     */
     public ReportesDAO(Connection conexion, JTable reportesTable, DefaultTableModel tableModel) {
         this.conexion = conexion;
         this.reportesTable = reportesTable;
         this.tableModel = tableModel;
     }
 
-    // Método para generar reporte de ventas por periodo
+    /**
+     * Genera un reporte de ventas por periodo (diario, semanal o mensual).
+     *
+     * @param periodo Periodo para el cual se generará el reporte (diario, semanal, mensual)
+     * @throws IllegalArgumentException Si el periodo no es válido
+     */
     public void generarReporteVentasPorPeriodo(String periodo) {
         tableModel.setRowCount(0);
 
@@ -87,7 +123,11 @@ public class ReportesDAO {
         }
     }
 
-    // Método para generar reporte de productos más vendidos
+    /**
+     * Genera un reporte de los productos más vendidos.
+     *
+     * @param limite Cantidad máxima de productos a mostrar en el reporte
+     */
     public void generarReporteProductosMasVendidos(int limite) {
         tableModel.setRowCount(0);
 
@@ -128,7 +168,11 @@ public class ReportesDAO {
         }
     }
 
-    // Método para generar reporte de clientes con más compras
+    /**
+     * Genera un reporte de los clientes con mayor número de compras.
+     *
+     * @param limite Cantidad máxima de clientes a mostrar en el reporte
+     */
     public void generarReporteClientesConMasCompras(int limite) {
         tableModel.setRowCount(0);
 
@@ -172,7 +216,11 @@ public class ReportesDAO {
         }
     }
 
-    // Método para generar reporte de productos con stock bajo
+    /**
+     * Genera un reporte de productos con stock bajo (por debajo del umbral especificado).
+     *
+     * @param umbralStock Valor umbral para considerar el stock como bajo
+     */
     public void generarReporteStockBajo(int umbralStock) {
         tableModel.setRowCount(0);
 
@@ -211,7 +259,11 @@ public class ReportesDAO {
         }
     }
 
-    // Método auxiliar para configurar las columnas de la tabla según el tipo de reporte
+    /**
+     * Método auxiliar para configurar las columnas de la tabla según el tipo de reporte.
+     *
+     * @param columnas Array con los nombres de las columnas a configurar
+     */
     private void configurarColumnas(String[] columnas) {
         tableModel.setColumnCount(0);
         for (String columna : columnas) {
@@ -219,13 +271,102 @@ public class ReportesDAO {
         }
     }
 
-    // Método para exportar reporte actual a PDF
-    public void exportarReporteActualAPDF(String tipoReporte) {
-        // Implementación de la exportación a PDF
-        // Este es un método que se completaría con una biblioteca como iText o JasperReports
-        // Esta por implementar
-        JOptionPane.showMessageDialog(null,
-                "La exportación a PDF para el reporte " + tipoReporte + " será implementada con una biblioteca como iText.",
-                "Exportación a PDF", JOptionPane.INFORMATION_MESSAGE);
+    /**
+     * Exporta el reporte actual a un archivo PDF usando la biblioteca iText.
+     * Permite al usuario seleccionar la ubicación donde guardar el archivo.
+     *
+     * @param tipoReporte Tipo de reporte que se está exportando
+     * @param nombreEmpleado Nombre del empleado que genera el reporte
+     */
+    public void exportarReporteActualAPDF(String tipoReporte, String nombreEmpleado) {
+        try {
+            // Crear el diálogo para seleccionar dónde guardar el archivo
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Guardar reporte PDF");
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fileChooser.setSelectedFile(new File(tipoReporte.replace(" ", "_") + ".pdf"));
+
+            if (fileChooser.showSaveDialog(null) != JFileChooser.APPROVE_OPTION) {
+                return;
+            }
+
+            File archivoSeleccionado = fileChooser.getSelectedFile();
+            String rutaArchivo = archivoSeleccionado.getAbsolutePath();
+            if (!rutaArchivo.toLowerCase().endsWith(".pdf")) {
+                rutaArchivo += ".pdf";
+            }
+
+            // Inicializar documento PDF
+            Document documento = new Document(PageSize.A4);
+            PdfWriter.getInstance(documento, new FileOutputStream(rutaArchivo));
+            documento.open();
+
+            // Agregar título del reporte
+            Font fontTitulo = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD);
+            Paragraph titulo = new Paragraph("Reporte: " + tipoReporte, fontTitulo);
+            titulo.setAlignment(Element.ALIGN_CENTER);
+            documento.add(titulo);
+
+            // Agregar información del reporte
+            Font fontNormal = new Font(Font.FontFamily.HELVETICA, 12);
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+
+            Paragraph fechaParrafo = new Paragraph("Fecha de generación: " + sdf.format(new Date()), fontNormal);
+            fechaParrafo.setSpacingBefore(10);
+            documento.add(fechaParrafo);
+
+            if (nombreEmpleado != null && !nombreEmpleado.isEmpty() && !nombreEmpleado.startsWith("Seleccione")) {
+                Paragraph empleadoParrafo = new Paragraph("Generado por: " + nombreEmpleado, fontNormal);
+                documento.add(empleadoParrafo);
+            }
+
+            documento.add(new Paragraph(" ")); // Espacio
+
+            // Crear tabla para el reporte
+            PdfPTable pdfTable = new PdfPTable(reportesTable.getColumnCount());
+            pdfTable.setWidthPercentage(100);
+
+            // Agregar encabezados
+            Font fontHeader = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
+            for (int i = 0; i < reportesTable.getColumnCount(); i++) {
+                PdfPCell cell = new PdfPCell(new Phrase(reportesTable.getColumnName(i), fontHeader));
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                cell.setPadding(5);
+                pdfTable.addCell(cell);
+            }
+
+            // Agregar datos
+            for (int row = 0; row < reportesTable.getRowCount(); row++) {
+                for (int col = 0; col < reportesTable.getColumnCount(); col++) {
+                    Object value = reportesTable.getValueAt(row, col);
+                    String texto = (value != null) ? value.toString() : "";
+                    PdfPCell cell = new PdfPCell(new Phrase(texto, fontNormal));
+                    cell.setPadding(5);
+                    pdfTable.addCell(cell);
+                }
+            }
+
+            documento.add(pdfTable);
+
+            // Agregar información adicional
+            Paragraph infoAdicional = new Paragraph("\nEste reporte fue generado automáticamente por el Sistema de Reportes de Ferretería.",
+                    new Font(Font.FontFamily.HELVETICA, 10, Font.ITALIC));
+            infoAdicional.setSpacingBefore(10);
+            documento.add(infoAdicional);
+
+            // Cerrar el documento
+            documento.close();
+
+            JOptionPane.showMessageDialog(null,
+                    "Reporte exportado exitosamente a:\n" + rutaArchivo,
+                    "Exportación Exitosa", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (DocumentException | IOException e) {
+            JOptionPane.showMessageDialog(null,
+                    "Error al exportar el reporte a PDF: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 }
