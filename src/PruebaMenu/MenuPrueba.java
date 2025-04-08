@@ -1,4 +1,4 @@
-package PruebaMenu.MenuPrueba.MenuPrueba;
+package PruebaMenu;
 
 import Clientes.ClientesGUI;
 import Empleados.EmpleadosGUI;
