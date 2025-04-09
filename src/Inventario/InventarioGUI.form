@@ -160,9 +160,12 @@
         <properties>
           <font name="JetBrains Mono"/>
           <model>
-            <item value="Tornillos"/>
             <item value="Herramientas"/>
-            <item value="Tuercas"/>
+            <item value="Materiales de Construcción"/>
+            <item value="Pinturas y Acabados"/>
+            <item value="Fontanería y Tuberías"/>
+            <item value="Electricidad y Cableado"/>
+            <item value="Adhesivos y Selladores"/>
           </model>
         </properties>
       </component>
