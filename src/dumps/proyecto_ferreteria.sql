@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 07-04-2025 a las 08:22:02
+-- Tiempo de generación: 09-04-2025 a las 17:46:18
 -- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Versión de PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de datos: `proyecto_ferreteria`
+-- Base de datos: `proyecto_ferreteria_v2`
 --
 
 -- --------------------------------------------------------
@@ -45,8 +45,28 @@ INSERT INTO `clientes` (`id_cliente`, `nombre`, `telefono`, `direccion`, `correo
 (6, 'Rasputin', '31244421', '3123', 'rasp213@jasdj.com'),
 (7, 'Carlos Pérez', '3123456789', 'Calle 1', 'carlos.perez@example.com'),
 (8, 'Mariana López', '3129876543', 'Avenida Siempre Viva 742', 'mariana.lopez@example.com'),
-(9, 'Andrés García', '3125678901', 'hhf', 'andres.garcia@example.com'),
-(10, 'Sofía Rodríguez', '3124567890', 'Avenida Central 456', 'sofia.rodriguez@example.com');
+(10, 'Sofía Rodríguez', '3124567890', 'Avenida Central 456', 'sofia.rodriguez@example.com'),
+(13, 'Dayana', '3117665432', 'Calle 2', 'dayana123@hotmail.com'),
+(14, 'Lucía Fernández', '3129988776', 'Calle Sol 89', 'lucia.fernandez@example.com'),
+(15, 'Juan Herrera', '3123344556', 'Carrera 45B', 'juan.herrera@example.com'),
+(16, 'Laura Castro', '3121122334', 'Calle 8 #334', 'laura.castro@example.com'),
+(17, 'Diego Morales', '3127766554', 'Av. Amazonía 201', 'diego.morales@example.com'),
+(18, 'Elena Ruiz', '3126677889', 'Calle Olivos 66', 'elena.ruiz@example.com'),
+(19, 'Marco Vargas', '3122233445', 'Av. Los Pinos 10', 'marco.vargas@example.com'),
+(20, 'Daniela León', '3124455667', 'Barrio Nuevo 31', 'daniela.leon@example.com'),
+(21, 'Andrés Molina', '3128899001', 'Callejón Estrella 19', 'andres.molina@example.com'),
+(22, 'Valentina Bravo', '3123344112', 'Av. Del Parque 5', 'valentina.bravo@example.com'),
+(23, 'Mateo Salas', '3121234000', 'Residencial Norte 44', 'mateo.salas@example.com'),
+(24, 'Camila Aguirre', '3128765432', 'Pasaje Luna 29', 'camila.aguirre@example.com'),
+(25, 'Jorge Cedeño', '3125432198', 'Callejón 21B', 'jorge.cedeno@example.com'),
+(26, 'Gabriela Paredes', '3129873210', 'Urbanización Central 11', 'gabriela.paredes@example.com'),
+(27, 'Esteban Quintero', '3124567123', 'Av. Libertad 88', 'esteban.quintero@example.com'),
+(28, 'Natalia Ramos', '3122223334', 'Calle 12C', 'natalia.ramos@example.com'),
+(29, 'Ricardo Medina', '3129991234', 'Avenida Del Río 33', 'ricardo.medina@example.com'),
+(30, 'Isabella Romero', '3127778889', 'Calle Bella 100', 'isabella.romero@example.com'),
+(31, 'Tomás Salcedo', '3123332221', 'Zona Norte 18', 'tomas.salcedo@example.com'),
+(32, 'Renata Mejía', '3124321567', 'Barrio Alegre 20', 'renata.mejia@example.com'),
+(33, 'Felipe Ibáñez', '3126547890', 'Diagonal 21A #7', 'felipe.ibanez@example.com');
 
 -- --------------------------------------------------------
 
@@ -67,13 +87,12 @@ CREATE TABLE `empleados` (
 
 INSERT INTO `empleados` (`id_empleado`, `nombre`, `cargo`, `salario`) VALUES
 (1, 'Alojo', 'Empleado', 350000.00),
-(4, 'Jhoan', 'Empleado', 200000.00),
+(4, 'Jhoan', 'Administrador', 200000.00),
 (5, 'Luis Fernández', 'Gerente', 1000000.00),
 (6, 'Ana Torres', 'Cajera', 1000000.00),
 (7, 'Pedro Gómez', 'Vendedor', 1000000.00),
-(8, 'Camila Ramírez', 'Auxiliar de Almacén', 1000000.00),
 (9, 'Jorge Castillo', 'Administrador', 12.00),
-(11, 'a', 'Gerente', 766.00);
+(11, 'Alicia', 'Gerente', 766.00);
 
 -- --------------------------------------------------------
 
@@ -84,7 +103,7 @@ INSERT INTO `empleados` (`id_empleado`, `nombre`, `cargo`, `salario`) VALUES
 CREATE TABLE `inventario_productos` (
   `id_producto` int(11) NOT NULL,
   `nombre_producto` varchar(50) NOT NULL,
-  `categoria` enum('Herramientas','Tornillos','Tuercas') NOT NULL,
+  `categoria` enum('Herramientas','Tornillos','Tuercas','Materiales de Construcción','Pinturas y Acabados','Fontanería y Tuberías','Electricidad y Cableado','Adhesivos y Selladores') NOT NULL,
   `cantidad_stock` int(11) NOT NULL,
   `precio_producto` decimal(10,2) NOT NULL,
   `id_proveedor_asociado` int(11) DEFAULT NULL
@@ -95,9 +114,12 @@ CREATE TABLE `inventario_productos` (
 --
 
 INSERT INTO `inventario_productos` (`id_producto`, `nombre_producto`, `categoria`, `cantidad_stock`, `precio_producto`, `id_proveedor_asociado`) VALUES
-(2, 'Cristian', 'Herramientas', 0, 500.00, 1),
-(4, 'Cristian', 'Tornillos', 19, 500.00, 1),
-(7, 'h', 'Tornillos', 0, 12.00, 1);
+(4, 'Alicate', 'Herramientas', 14, 500.00, 1),
+(7, 'Serrucho', 'Herramientas', 0, 12.00, 1),
+(8, 'Martillo', 'Herramientas', 45, 500.00, 1),
+(69, 'Pala', 'Herramientas', 20, 700.00, 4),
+(70, 'Cemento', 'Materiales de Construcción', 30, 80000.00, 4),
+(71, 'Cegueta', 'Herramientas', 15, 5000.00, 7);
 
 -- --------------------------------------------------------
 
@@ -120,30 +142,14 @@ CREATE TABLE `ordenes_compra` (
 --
 
 INSERT INTO `ordenes_compra` (`id_orden_compra`, `id_cliente`, `id_empleado`, `id_producto`, `total`, `estado_orden`, `fecha_compra`) VALUES
-(1, 1, 1, 2, 4760.00, 'pagada', '2025-04-04 02:58:53'),
-(2, 1, 1, 2, 4760.00, 'pagada', '2025-04-04 03:00:14'),
-(3, 1, 1, 2, 4760.00, 'pagada', '2025-04-04 03:00:20'),
-(4, 1, 1, 2, 4760.00, 'pagada', '2025-04-04 03:00:30'),
-(5, 10, 4, 2, 1155.00, 'pendiente', '2025-04-04 03:28:52'),
-(6, 1, 1, 2, 1190.00, 'pendiente', '2025-04-04 03:29:40'),
-(7, 1, 1, 2, 595.00, 'pendiente', '2025-04-04 03:31:52'),
-(8, 5, 1, 2, 1785.00, 'pendiente', '2025-04-04 03:36:22'),
-(9, 1, 1, 2, 595.00, 'pendiente', '2025-04-06 04:21:37'),
-(10, 1, 1, 2, 595.00, 'pendiente', '2025-04-06 04:21:59'),
-(11, 1, 1, 2, 595.00, 'pendiente', '2025-04-06 04:22:06'),
-(12, 1, 1, 2, 595.00, 'pendiente', '2025-04-06 04:22:11'),
-(13, 1, 1, 2, 595.00, 'pendiente', '2025-04-06 04:22:25'),
-(14, 1, 1, 2, 1190.00, 'pagada', '2025-04-06 04:22:39'),
-(15, 1, 1, 2, 1190.00, 'pagada', '2025-04-06 04:22:42'),
-(16, 1, 1, 2, 1190.00, 'pagada', '2025-04-06 04:23:04'),
-(17, 1, 1, 2, 1190.00, 'pagada', '2025-04-06 04:23:12'),
 (18, 1, 1, 4, 595.00, 'pendiente', '2025-04-06 04:31:22'),
 (19, 1, 1, 4, 1783.81, 'pendiente', '2025-04-06 04:34:33'),
 (20, 1, 1, 4, 595.00, 'pendiente', '2025-04-06 04:47:55'),
 (21, 1, 1, 4, 7720.72, 'pendiente', '2025-04-06 04:49:50'),
 (23, 1, 1, 4, 595.00, 'pendiente', '2025-04-06 23:40:41'),
 (24, 1, 1, 4, 595.00, 'pendiente', '2025-04-06 23:48:51'),
-(28, 1, 1, 4, 595.00, 'pendiente', '2025-04-07 00:24:49');
+(28, 1, 1, 4, 595.00, 'pendiente', '2025-04-07 00:24:49'),
+(29, 5, 1, 4, 2975.00, 'pagada', '2025-04-08 04:17:04');
 
 -- --------------------------------------------------------
 
@@ -167,10 +173,11 @@ INSERT INTO `proveedores` (`id_proveedor`, `nombre`, `contacto`, `categoria_prod
 (4, 'Karol Arbelaez', '31123441', 'Herramientas'),
 (5, 'Quico', '5671222132', 'Maquinaria'),
 (7, 'Suministros Industriales S.A.', '3123456789', 'Herramientas'),
-(8, 'ElectroPartes LTDA', '3159876543', 'Materiales Eléctricos'),
-(9, 'Maderas y Construcción', '3101122334', 'Madera y Derivados'),
-(10, 'FerreMax Distribuidores', '3195566778', 'Tornillos y Fijaciones'),
-(11, 'TecnoPlásticos S.R.L.', '3112233445', 'Tubos y Conexiones');
+(8, 'ElectroPartes LTDA', '3159876543', 'Herramientas'),
+(10, 'FerreMax Distribuidores', '3195566778', 'Herramientas'),
+(11, 'TecnoPlásticos S.R.L.', '111333213', 'Tubos y Conexiones'),
+(12, 'Josefina', '33214453', 'Herramienta'),
+(13, 'Gustavo', '3124442343', 'Fontanería y Tuberías');
 
 -- --------------------------------------------------------
 
@@ -253,7 +260,7 @@ ALTER TABLE `registro_ventas`
 -- AUTO_INCREMENT de la tabla `clientes`
 --
 ALTER TABLE `clientes`
-  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT de la tabla `empleados`
@@ -265,19 +272,19 @@ ALTER TABLE `empleados`
 -- AUTO_INCREMENT de la tabla `inventario_productos`
 --
 ALTER TABLE `inventario_productos`
-  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
 
 --
 -- AUTO_INCREMENT de la tabla `ordenes_compra`
 --
 ALTER TABLE `ordenes_compra`
-  MODIFY `id_orden_compra` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id_orden_compra` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT de la tabla `proveedores`
 --
 ALTER TABLE `proveedores`
-  MODIFY `id_proveedor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_proveedor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `registro_ventas`
