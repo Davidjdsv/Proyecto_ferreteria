@@ -57,6 +57,7 @@ public class InventarioGUI {
     private JButton eliminarButton;
     private JButton volverButton;
     private JComboBox comboBox1;
+    private JComboBox proveedorAsociadoComboBox;
 
     /** Objeto para realizar operaciones de acceso a datos */
     InventarioDAO inventarioDAO = new InventarioDAO();
@@ -73,10 +74,16 @@ public class InventarioGUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String nombreProducto = nombre.getText();
-                String categoriaProducto = comboBox1.getSelectedItem().toString();                int precioProducto = Integer.parseInt(precio.getText());
+                String categoriaProducto = comboBox1.getSelectedItem().toString();
+                int precioProducto = Integer.parseInt(precio.getText());
                 int cantidadStock = Integer.parseInt(cantidad_stock.getText());
-                Integer idProveedor = id_proveedor.getText().isEmpty() ? null : Integer.parseInt(id_proveedor.getText());
-
+                String seleccionado = proveedorAsociadoComboBox.getSelectedItem().toString();
+                Integer idProveedor = null;
+                if (!seleccionado.isEmpty() && seleccionado.contains(" - ")) {
+                    // Se asume que el formato es "id - nombre"
+                    String[] partes = seleccionado.split(" - ");
+                    idProveedor = Integer.parseInt(partes[0]);
+                }
                 Inventario inventario = new Inventario(0, nombreProducto, categoriaProducto, cantidadStock, precioProducto, idProveedor);
                 inventarioDAO.agregar(inventario);
                 obtener_datos();
@@ -88,16 +95,43 @@ public class InventarioGUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String nombreProducto = nombre.getText();
-                String categoriaProducto = comboBox1.getSelectedItem().toString();                int precioProducto = Integer.parseInt(precio.getText());
+                String categoriaProducto = comboBox1.getSelectedItem().toString();
+                int precioProducto = Integer.parseInt(precio.getText());
                 int cantidadStock = Integer.parseInt(cantidad_stock.getText());
                 int idProducto = Integer.parseInt(id.getText());
-                Integer idProveedor = id_proveedor.getText().isEmpty() ? null : Integer.parseInt(id_proveedor.getText());
+                String seleccionado = proveedorAsociadoComboBox.getSelectedItem().toString();
+                Integer idProveedor = null;
+                if (!seleccionado.isEmpty() && seleccionado.contains(" - ")) {
+                    // Se asume que el formato es "id - nombre"
+                    String[] partes = seleccionado.split(" - ");
+                    idProveedor = Integer.parseInt(partes[0]);
+                }
 
                 Inventario inventario = new Inventario(idProducto, nombreProducto, categoriaProducto, cantidadStock, precioProducto, idProveedor);
                 inventarioDAO.actualizar(inventario);
                 obtener_datos();
                 clear();
             }
+        });
+
+        // Llamamos al método para cargar proveedores y asignamos el modelo al combobox
+        DefaultComboBoxModel<String> proveedorModel = inventarioDAO.cargarProveedores();
+        proveedorAsociadoComboBox.setModel(proveedorModel);
+
+        // Si necesitás detectar cambios en el combobox para extraer el id,
+        // podés agregar un ActionListener:
+        proveedorAsociadoComboBox.addActionListener(e -> {
+            String seleccionado = (String) proveedorAsociadoComboBox.getSelectedItem();
+
+            // Por ejemplo, si el formato es "id - nombre", podés extraer el id así:
+            if(seleccionado != null && seleccionado.contains(" - ")) {
+                String[] parts = seleccionado.split(" - ");
+                int idProveedor = Integer.parseInt(parts[0]);
+                System.out.println("Proveedor seleccionado: " + idProveedor);
+                // Guardá o procesá el idProveedor según necesites
+            }
+
+
         });
 
         eliminarButton.addActionListener(new ActionListener() {

@@ -5,7 +5,6 @@ import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -27,11 +26,11 @@ public class ProveedoresGUI {
     private JTextField id_proveedorTextField;
     private JTextField contactoTextField;
     private JTextField nombreTextField;
-    private JTextField categoria_productoTextField;
     private JButton agregarButton;
     private JButton eliminarButton;
     private JButton actualizarButton;
     private JPanel main;
+    private JComboBox categoriaComboBox;
     private int filas = 0;
 
     private ProveedoresDAO proveedoresDAO = new ProveedoresDAO();
@@ -54,7 +53,7 @@ public class ProveedoresGUI {
             public void actionPerformed(ActionEvent e) {
                 String nombre = nombreTextField.getText();
                 String contacto = contactoTextField.getText();
-                String categoria_producto = categoria_productoTextField.getText();
+                String categoria_producto = categoriaComboBox.getSelectedItem().toString();
 
                 Proveedores proveedores = new Proveedores(0, nombre, contacto, categoria_producto);
                 proveedoresDAO.agregar(proveedores);
@@ -68,7 +67,7 @@ public class ProveedoresGUI {
             public void actionPerformed(ActionEvent e) {
                 String nombre = nombreTextField.getText();
                 String contacto = contactoTextField.getText();
-                String categoria_producto = categoria_productoTextField.getText();
+                String categoria_producto = categoriaComboBox.getSelectedItem().toString();
                 int id_proveedor = Integer.parseInt(id_proveedorTextField.getText());
 
                 Proveedores proveedores = new Proveedores(id_proveedor, nombre, contacto, categoria_producto);
@@ -98,7 +97,7 @@ public class ProveedoresGUI {
                     id_proveedorTextField.setText(table1.getValueAt(selectFila, 0).toString());
                     nombreTextField.setText(table1.getValueAt(selectFila, 1).toString());
                     contactoTextField.setText(table1.getValueAt(selectFila, 2).toString());
-                    categoria_productoTextField.setText(table1.getValueAt(selectFila, 3).toString());
+                    categoriaComboBox.setSelectedItem(table1.getValueAt(selectFila, 3).toString());
 
                     filas = selectFila;
                 }
@@ -113,7 +112,7 @@ public class ProveedoresGUI {
         id_proveedorTextField.setText("");
         nombreTextField.setText("");
         contactoTextField.setText("");
-        categoria_productoTextField.setText("");
+        categoriaComboBox.setSelectedItem("");
     }
 
     /**

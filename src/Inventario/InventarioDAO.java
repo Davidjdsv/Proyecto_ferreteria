@@ -73,6 +73,27 @@ public class InventarioDAO {
         }
     }
 
+    public DefaultComboBoxModel<String> cargarProveedores() {
+        // Creamos un modelo para el JComboBox que contendrá, por ejemplo, "id - nombre"
+        DefaultComboBoxModel<String> comboModel = new DefaultComboBoxModel<>();
+        Connection con = conexionDB.getConnection();
+        String query = "SELECT id_proveedor, nombre FROM proveedores";
+        try (PreparedStatement ps = con.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            while(rs.next()){
+                int id = rs.getInt("id_proveedor");
+                String nombre = rs.getString("nombre");
+                // Puedes elegir cómo mostrar la información, por ejemplo "id - nombre"
+                comboModel.addElement(id + " - " + nombre);
+            }
+        } catch(SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al cargar proveedores: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return comboModel;
+    }
+
+
     /**
      * Elimina un producto del inventario por su ID.
      *
