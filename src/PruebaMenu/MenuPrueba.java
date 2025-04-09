@@ -278,13 +278,10 @@ package PruebaMenu;
                 SwingUtilities.invokeLater(() -> {
                     JFrame frame = new JFrame("Menú - Ferretería");
                     MenuPrueba app = new MenuPrueba();
-
                     frame.setContentPane(app.mainPanel);
                     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                    frame.setMinimumSize(new Dimension(900, 700));
-                    frame.setPreferredSize(new Dimension(1100, 750));
                     frame.pack();
+                    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
                     frame.setVisible(true);
                 });
             }
