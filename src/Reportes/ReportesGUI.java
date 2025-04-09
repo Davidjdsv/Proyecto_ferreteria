@@ -7,6 +7,7 @@ import Conexion.ConexionDB;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.html.Option;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -449,7 +450,12 @@ public class ReportesGUI extends JFrame {
         salirButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.exit(0);
+                int opcion = JOptionPane.showConfirmDialog(ReportesGUI.this,
+                        "¿Está seguro de que desea salir?",
+                        "Confirmar salida", JOptionPane.YES_NO_OPTION);
+                if (opcion == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
             }
         });
     }
