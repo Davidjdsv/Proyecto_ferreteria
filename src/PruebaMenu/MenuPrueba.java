@@ -3,6 +3,7 @@ package PruebaMenu;
         import Clientes.ClientesGUI;
         import Empleados.EmpleadosGUI;
         import Inventario.InventarioGUI;
+        import LoginCliente.LoginClienteGUI;
         import Orden_Compras.OrdenesCompraGUI;
         import Proveedores.ProveedoresGUI;
         import Reportes.ReportesGUI;
@@ -265,7 +266,7 @@ package PruebaMenu;
              *
              * @param args Argumentos de línea de comandos.
              */
-            public static void main(String[] args) {
+           public static void main(String[] args) {
                 try {
                     // Configurar el tema visual de la aplicación
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -273,16 +274,31 @@ package PruebaMenu;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                // ====== INICIO DE CÓDIGO MODIFICADO ======
+                // Mostrar pantalla de login antes del menú principal
+                LoginClienteGUI loginGUI = new LoginClienteGUI() {
+                    protected void onLoginExitoso(int idCliente, String nombre, String apellido) {
+                        // Cerrar ventana de login
+                        this.cerrarVentana();
 
-                // Crear y mostrar la ventana principal
-                SwingUtilities.invokeLater(() -> {
-                    JFrame frame = new JFrame("Menú - Ferretería");
-                    MenuPrueba app = new MenuPrueba();
-                    frame.setContentPane(app.mainPanel);
-                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    frame.pack();
-                    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                    frame.setVisible(true);
-                });
-            }
+                        // Cuando el login es exitoso, mostrar el menú principal
+                        SwingUtilities.invokeLater(() -> {
+                            JFrame frame = new JFrame("Menú - Ferretería");
+                            MenuPrueba app = new MenuPrueba();
+                            frame.setContentPane(app.mainPanel);
+                            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                            frame.pack();
+                            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                            frame.setVisible(true);
+                        });
+                    }
+
+                    public void cerrarVentana() {
+                        if (mainPanel != null) {
+                            mainPanel.disable();
+                        }
+                    }
+                };
+                loginGUI.mostrar();
+           }
         }
