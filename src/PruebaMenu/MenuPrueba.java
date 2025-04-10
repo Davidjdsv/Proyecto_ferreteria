@@ -1,4 +1,4 @@
-package PruebaMenu.MenuPrueba.MenuPrueba;
+package PruebaMenu;
 
 import Clientes.ClientesGUI;
 import Empleados.EmpleadosGUI;
@@ -19,28 +19,37 @@ import java.util.HashMap;
 import java.util.Map;
 import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 
-
+/**
+ * Clase principal para gestionar el menú de la aplicación.
+ * Proporciona navegación entre diferentes módulos y una interfaz gráfica basada en Swing.
+ */
 public class MenuPrueba {
-    public JPanel mainPanel;
-    public JPanel menuPanel;
-    public JPanel contentPanel;
-    public JPanel welcomePanel;
-    public JLabel lblTitulo;
-    public JButton btnInventario;
-    public JButton btnClientes;
-    public JButton btnEmpleados;
-    public JButton btnProveedores;
-    public JButton btnOrdenesCompra;
-    public JButton btnVender;
-    public JButton btnReportes;
-    public JButton btnToggleMenu;
-    public JLabel lblWelcomeImage;
-    private JButton chatButton;
+    // Componentes principales de la interfaz gráfica
+    public JPanel mainPanel; // Panel principal que contiene todos los elementos
+    public JPanel menuPanel; // Panel lateral del menú
+    public JPanel contentPanel; // Panel para mostrar el contenido de los módulos
+    public JPanel welcomePanel; // Panel de bienvenida
+    public JLabel lblTitulo; // Etiqueta para el título
+    public JButton btnInventario; // Botón para acceder al módulo de inventario
+    public JButton btnClientes; // Botón para acceder al módulo de clientes
+    public JButton btnEmpleados; // Botón para acceder al módulo de empleados
+    public JButton btnProveedores; // Botón para acceder al módulo de proveedores
+    public JButton btnOrdenesCompra; // Botón para acceder al módulo de órdenes de compra
+    public JButton btnVender; // Botón para acceder al módulo de ventas
+    public JButton btnReportes; // Botón para acceder al módulo de reportes
+    public JButton btnToggleMenu; // Botón para mostrar/ocultar el menú lateral
+    public JLabel lblWelcomeImage; // Etiqueta para mostrar una imagen de bienvenida
+    private JButton chatButton; // Botón para acceder al módulo de chat
+    private JLabel Icono;
 
-    private boolean menuVisible = true;
-    private Map<String, JPanel> panelCache = new HashMap<>();
-    private Map<String, Object> instanceCache = new HashMap<>();
+    private boolean menuVisible = true; // Estado de visibilidad del menú lateral
+    private Map<String, JPanel> panelCache = new HashMap<>(); // Caché de paneles cargados
+    private Map<String, Object> instanceCache = new HashMap<>(); // Caché de instancias de módulos
 
+    /**
+     * Constructor de la clase MenuPrueba.
+     * Configura el diseño inicial, listeners de botones y carga la imagen de bienvenida.
+     */
     public MenuPrueba() {
         // Configurar el contentPanel con CardLayout para gestionar diferentes vistas
         contentPanel.setLayout(new CardLayout());
@@ -55,10 +64,55 @@ public class MenuPrueba {
             mainPanel.repaint();
         });
 
+        // Cargar imagen en lblWelcomeImage
+        try {
+            // Obtener el tamaño del JLabel
+            int lblWidth = lblWelcomeImage.getWidth();
+            int lblHeight = lblWelcomeImage.getHeight();
+            // Cargar la imagen desde el archivo
+            ImageIcon imagenFondo = new ImageIcon("Resources/Img/fondo_ferreteria.jpg");
+            // Redimensionar la imagen si es necesario
+            Image img = imagenFondo.getImage();
+            // Ajustar al tamaño que necesites (puedes ajustar estos valores)
+            Image imgRedimensionada = img.getScaledInstance(750, 450, Image.SCALE_SMOOTH);
+            ImageIcon iconoRedimensionado = new ImageIcon(imgRedimensionada);
+
+            lblWelcomeImage.setIcon(iconoRedimensionado);
+        } catch (Exception e) {
+            System.err.println("Error al cargar la imagen: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Cargar imagen en el JLabel Icono
+        try {
+            // Cargar la imagen icono.png desde la carpeta Resources
+            ImageIcon iconoImage = new ImageIcon("Resources/img/icono.png");
+            // Redimensionar la imagen si es necesario según el tamaño del JLabel
+            int iconoWidth = Icono.getWidth();
+            int iconoHeight = Icono.getHeight();
+            // Si el JLabel aún no tiene dimensiones (común al iniciar), usar un tamaño predeterminado
+            if (iconoWidth <= 0 || iconoHeight <= 0) {
+                iconoWidth = 225; // Ancho predeterminado
+                iconoHeight = 200; // Alto predeterminado
+            }
+            Image img = iconoImage.getImage();
+            Image imgRedimensionada = img.getScaledInstance(iconoWidth, iconoHeight, Image.SCALE_SMOOTH);
+            ImageIcon iconoRedimensionado = new ImageIcon(imgRedimensionada);
+
+            // Establecer la imagen en el JLabel Icono
+            Icono.setIcon(iconoRedimensionado);
+        } catch (Exception e) {
+            System.err.println("Error al cargar la imagen icono.png: " + e.getMessage());
+            e.printStackTrace();
+        }
+
         // Configurar ActionListeners para cada botón
         setupButtonActions();
     }
 
+    /**
+     * Configura los ActionListeners para los botones del menú.
+     */
     private void setupButtonActions() {
         btnInventario.addActionListener(e -> cargarPanel("Inventario", InventarioGUI.class));
         btnClientes.addActionListener(e -> cargarPanel("Clientes", ClientesGUI.class));
@@ -70,6 +124,14 @@ public class MenuPrueba {
         chatButton.addActionListener(e -> cargarPanel("Chat", ClienteGUI.class));
     }
 
+    /**
+     * Carga un panel específico en el contentPanel.
+     * Si el panel ya está en caché, lo muestra directamente.
+     * Si no, lo crea dinámicamente y lo agrega al caché.
+     *
+     * @param nombre   Nombre del panel a cargar.
+     * @param guiClass Clase del módulo que se desea cargar.
+     */
     private void cargarPanel(String nombre, Class<?> guiClass) {
         try {
             System.out.println("Cargando panel: " + nombre);
@@ -184,6 +246,12 @@ public class MenuPrueba {
         }
     }
 
+    /**
+     * Verifica si un panel contiene un botón de "volver" o similar.
+     *
+     * @param panel Panel a verificar.
+     * @return true si contiene un botón de "volver", false en caso contrario.
+     */
     private boolean hasBackButton(JPanel panel) {
         Component[] components = panel.getComponents();
         for (Component component : components) {
@@ -203,6 +271,11 @@ public class MenuPrueba {
         return false;
     }
 
+    /**
+     * Muestra un panel específico en el contentPanel.
+     *
+     * @param nombre Nombre del panel a mostrar.
+     */
     private void mostrarPanel(String nombre) {
         System.out.println("Mostrando panel: " + nombre);
         CardLayout cl = (CardLayout) contentPanel.getLayout();
@@ -211,24 +284,28 @@ public class MenuPrueba {
         contentPanel.repaint();
     }
 
+    /**
+     * Método principal para iniciar la aplicación.
+     *
+     * @param args Argumentos de línea de comandos.
+     */
     public static void main(String[] args) {
         try {
+            // Configurar el tema visual de la aplicación
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             UIManager.setLookAndFeel(new FlatArcDarkIJTheme());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        // Crear y mostrar la ventana principal
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Menú - Ferretería");
             MenuPrueba app = new MenuPrueba();
-
             frame.setContentPane(app.mainPanel);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-            frame.setMinimumSize(new Dimension(900, 700));
-            frame.setPreferredSize(new Dimension(1100, 750));
             frame.pack();
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
             frame.setVisible(true);
         });
     }
