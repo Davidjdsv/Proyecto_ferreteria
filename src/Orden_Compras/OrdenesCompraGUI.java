@@ -25,6 +25,10 @@ import java.util.Date;
 import java.util.*;
 
 /**
+ * Cualquier cosa para probar cambios
+ */
+
+/**
  * Clase OrdenesCompraGUI que representa la interfaz gráfica para gestionar órdenes de compra.
  * Esta clase permite visualizar, filtrar y gestionar órdenes de compra relacionadas con clientes y empleados.
  * Incluye funcionalidades para cambiar el estado de las órdenes y generar facturas en PDF.
