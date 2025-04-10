@@ -1,31 +1,39 @@
 package Orden_Compras;
 
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.*;
-import java.io.FileOutputStream;
-import java.io.File;
-
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.BaseColor;
+import java.util.*;
 
 /**
  * Clase OrdenesCompraGUI que representa la interfaz gráfica para gestionar órdenes de compra.
  * Esta clase permite visualizar, filtrar y gestionar órdenes de compra relacionadas con clientes y empleados.
  * Incluye funcionalidades para cambiar el estado de las órdenes y generar facturas en PDF.
  * @author Cristian Restrepo
- * @version 1.4
+ * @version 1.5
  */
+
+
+
 public class OrdenesCompraGUI {
     /** Tabla para mostrar los registros de órdenes de compra */
     private JTable table1;
@@ -45,10 +53,9 @@ public class OrdenesCompraGUI {
     private JTextField EmpleadoTextField;
     /** Campo de texto para producto */
     private JTextField ProductoTextField;
-    /** ComboBox para seleccionar el estado de la orden */
-    /** ComboBox para filtrar por tipo (todos, por empleado, por cliente) */
-    private JComboBox<String> configurarFiltroComboBox;
-    /** Botón para actualizar el estado de una orden */
+    /** Campo de texto para el estado de la orden */
+    private JTextField estadoTextField;
+    /** Botón para actualizar el estado de la orden */
     private JButton actualizarEstadoButton;
     /** Botón para generar una factura PDF */
     private JButton generarFacturaButton;
@@ -62,7 +69,159 @@ public class OrdenesCompraGUI {
     private JButton buscarButton;
     /** Botón para limpiar filtros */
     private JButton limpiarFiltrosButton;
-    private JTextField estadoTextField;
+    private JButton enviarCorreoButton;
+    /**
+     * Constante para el cálculo del IVA (19%)
+     */
+    private static final double IVA_RATE = 0.19;
+    /**
+     * Agrega líneas vacías a un objeto Paragraph.
+     * @param paragraph El objeto Paragraph al que se agregarán las líneas vacías.
+     * @param number La cantidad de líneas vacías a agregar.
+     */
+    private void addEmptyLine(Paragraph paragraph, int number) {
+        for (int i = 0; i < number; i++) {
+            paragraph.add(new Paragraph(" "));
+        }
+    }
+    /**
+     * Clase auxiliar para almacenar los detalles de una orden
+     */
+    private class OrdenDetalle {
+        private int idOrden;
+        private String cliente;
+        private String direccion;
+        private String telefono;
+        private String empleado;
+        private String estado;
+        private String fecha;
+
+
+        public java.util.List<ProductoOrden> getProductos()
+        { return productos; }
+
+        public int getIdOrden() { return idOrden; }
+        public void setIdOrden(int idOrden) { this.idOrden = idOrden; }
+
+        public String getCliente() { return cliente; }
+        public void setCliente(String cliente) { this.cliente = cliente; }
+
+        public String getDireccion() { return direccion; }
+        public void setDireccion(String direccion) { this.direccion = direccion; }
+
+        public String getTelefono() { return telefono; }
+        public void setTelefono(String telefono) { this.telefono = telefono; }
+
+        public String getEmpleado() { return empleado; }
+        public void setEmpleado(String empleado) { this.empleado = empleado; }
+
+        public String getEstado() { return estado; }
+        public void setEstado(String estado) { this.estado = estado; }
+
+        public String getFecha() { return fecha; }
+        public void setFecha(String fecha) { this.fecha = fecha; }
+
+        private java.util.List productos = new ArrayList<>();    }
+
+    /**
+     * Clase auxiliar para almacenar la información de cada producto en la orden
+     */
+    private class ProductoOrden {
+        private String nombre;
+        private double precioUnitario;
+        private int cantidad;
+
+        public ProductoOrden(String nombre, double precioUnitario, int cantidad) {
+            this.nombre = nombre;
+            this.precioUnitario = precioUnitario;
+            this.cantidad = cantidad;
+        }
+
+        public String getNombre() { return nombre; }
+        public double getPrecioUnitario() { return precioUnitario; }
+        public int getCantidad() { return cantidad; }
+
+        // Calcular el IVA para este producto
+        public double getIva() {
+            return precioUnitario * cantidad * IVA_RATE;
+        }
+
+        // Calcular el total para este producto (precio * cantidad + IVA)
+        public double getTotal() {
+            return precioUnitario * cantidad + getIva();
+        }
+    }
+
+    /**
+     * Obtiene todos los detalles necesarios de una orden de compra para generar la factura.
+     * Incluye información del cliente, producto, precios y estado.
+     * @param idOrden ID de la orden de compra
+     * @return Un objeto OrdenDetalle con toda la información necesaria o null si no se encuentra
+     */
+    private OrdenDetalle obtenerDetalleOrden(int idOrden) {
+        OrdenDetalle detalle = new OrdenDetalle();
+
+        try {
+            // Primera consulta: obtener datos de la orden y cliente
+            String sqlOrden = "SELECT oc.id_orden_compra, c.nombre as cliente, c.direccion, c.telefono, " +
+                    "e.nombre as empleado, oc.estado_orden, oc.fecha_compra " +
+                    "FROM ordenes_compra oc " +
+                    "JOIN clientes c ON oc.id_cliente = c.id_cliente " +
+                    "JOIN empleados e ON oc.id_empleado = e.id_empleado " +
+                    "WHERE oc.id_orden_compra = ?";
+
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlOrden)) {
+                pstmt.setInt(1, idOrden);
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    detalle.setIdOrden(rs.getInt("id_orden_compra"));
+                    detalle.setCliente(rs.getString("cliente"));
+                    detalle.setDireccion(rs.getString("direccion"));
+                    detalle.setTelefono(rs.getString("telefono"));
+                    detalle.setEmpleado(rs.getString("empleado"));
+                    detalle.setEstado(rs.getString("estado_orden"));
+                    detalle.setFecha(rs.getString("fecha_compra"));
+
+                    // Segunda consulta: obtener todos los productos relacionados con la orden
+                    String sqlProductos = "SELECT p.nombre_producto, p.precio_producto, rv.cantidad " +
+                            "FROM ordenes_compra oc " +
+                            "JOIN inventario_productos p ON oc.id_producto = p.id_producto " +
+                            "LEFT JOIN registro_ventas rv ON oc.id_orden_compra = rv.id_orden_compra " +
+                            "WHERE oc.id_orden_compra = ?";
+
+                    try (PreparedStatement pstmtProductos = conn.prepareStatement(sqlProductos)) {
+                        pstmtProductos.setInt(1, idOrden);
+                        ResultSet rsProductos = pstmtProductos.executeQuery();
+
+                        // Verificar si hay al menos un producto
+                        boolean hayProductos = false;
+
+                        while (rsProductos.next()) {
+                            hayProductos = true;
+                            String nombreProducto = rsProductos.getString("nombre_producto");
+                            double precioUnitario = rsProductos.getDouble("precio_producto");
+                            int cantidad = rsProductos.getInt("cantidad");
+                            if (cantidad == 0) cantidad = 1; // Si no hay registro en ventas
+
+                            detalle.getProductos().add(new ProductoOrden(nombreProducto, precioUnitario, cantidad));
+                        }
+
+                        if (!hayProductos) {
+                            JOptionPane.showMessageDialog(null, "No se encontraron productos para esta orden");
+                            return null;
+                        }
+
+                        return detalle;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al obtener detalles de la orden: " + e.getMessage());
+        }
+
+        return null;
+    }
 
     /**
      * Mapas para almacenar los IDs de clientes, empleados y productos.
@@ -91,14 +250,60 @@ public class OrdenesCompraGUI {
      * Constructor de la clase OrdenesCompraGUI.
      * Inicializa la interfaz y configura todos los componentes y listeners.
      */
+
+
+    public void enviarFacturaPorCorreo(String destinatario, String asunto, String mensaje, String rutaArchivo) {
+        // Configuración del servidor SMTP
+        String remitente = "restrepo5088@gmail.com";
+        String clave = "yodx sgas muim dioo";
+
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.debug", "true");
+
+        // Autenticación
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(remitente, clave);
+            }
+        });
+
+        try {
+            // Crear el mensaje
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(remitente));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(destinatario));
+            message.setSubject(asunto);
+
+            // Crear el cuerpo del mensaje
+            MimeBodyPart texto = new MimeBodyPart();
+            texto.setText(mensaje);
+
+            // Adjuntar el archivo
+            MimeBodyPart adjunto = new MimeBodyPart();
+            adjunto.attachFile(new File(rutaArchivo));
+
+            // Combinar texto y archivo adjunto
+            Multipart multipart = new MimeMultipart();
+            multipart.addBodyPart(texto);
+            multipart.addBodyPart(adjunto);
+
+            message.setContent(multipart);
+
+            // Enviar el correo
+            Transport.send(message);
+            JOptionPane.showMessageDialog(null, "Factura enviada correctamente a " + destinatario);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error al enviar el correo: " + e.getMessage());
+        }
+    }
     public OrdenesCompraGUI() {
         // Configurar la tabla
         configurarTabla();
-
-        // Configurar el ComboBox de filtro
-        configurarFiltroComboBox();
-        
-     
 
         // Configurar botones de acción
         configurarBotones();
@@ -120,31 +325,29 @@ public class OrdenesCompraGUI {
         // Listener para cargar datos en los campos cuando se selecciona una fila
         configurarListenerTabla();
 
-        // Listener para el ComboBox de filtro
-        configurarListenerFiltro();
-
         // Listener para el campo de ID de orden
         configurarListenerIdOrden();
 
         // Limpiar campos inicialmente
         limpiarCampos();
-    }
+        enviarCorreoButton.addActionListener(e -> {
+            if (idOrdenCompra.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Por favor, seleccione una orden para enviar la factura");
+                return;
+            }
 
-    private void configurarListenerFiltro() {
-        configurarFiltroComboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String filtroSeleccionado = (String) configurarFiltroComboBox.getSelectedItem();
-                if (filtroSeleccionado != null && !filtroSeleccionado.equals("Todas las órdenes")) {
-                    filtroTextField.setEnabled(true);
-                } else {
-                    filtroTextField.setEnabled(false);
-                    filtroTextField.setText("");
-                }
+            String destinatario = JOptionPane.showInputDialog("Ingrese el correo del destinatario:");
+            if (destinatario != null && !destinatario.trim().isEmpty()) {
+                String rutaArchivo = System.getProperty("user.home") + File.separator + "Downloads" + File.separator + "Factura_" + idOrdenCompra.getText() + ".pdf";
+                enviarFacturaPorCorreo(destinatario, "Factura de Compra", "Future soft.", rutaArchivo);
             }
         });
     }
 
+    /**
+     * Configura el listener para la tabla.
+     * Carga los datos en los campos cuando se selecciona una fila.
+     */
     private void configurarListenerTabla() {
         table1.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && table1.getSelectedRow() != -1) {
@@ -153,26 +356,29 @@ public class OrdenesCompraGUI {
         });
     }
 
+    /**
+     * Carga los empleados desde la base de datos en el mapa de empleados.
+     */
     private void cargarEmpleados() {
         try {
             String sql = "SELECT id_empleado, nombre FROM empleados";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql)) {
 
-            while (rs.next()) {
-                int idEmpleado = rs.getInt("id_empleado");
-                String nombreEmpleado = rs.getString("nombre");
-
-                empleadosMap.put(nombreEmpleado, idEmpleado);
+                while (rs.next()) {
+                    int idEmpleado = rs.getInt("id_empleado");
+                    String nombreEmpleado = rs.getString("nombre");
+                    empleadosMap.put(nombreEmpleado, idEmpleado);
+                }
             }
-
-            rs.close();
-            stmt.close();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al cargar empleados: " + e.getMessage());
         }
     }
 
+    /**
+     * Establece la conexión con la base de datos MySQL.
+     */
     private void establecerConexion() {
         try {
             String url = "jdbc:mysql://localhost:3306/proyecto_ferreteria";
@@ -185,61 +391,59 @@ public class OrdenesCompraGUI {
         }
     }
 
+    /**
+     * Carga los clientes desde la base de datos en el mapa de clientes.
+     */
     private void cargarClientes() {
         try {
             String sql = "SELECT id_cliente, nombre FROM clientes";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql)) {
 
-            while (rs.next()) {
-                int idCliente = rs.getInt("id_cliente");
-                String nombreCliente = rs.getString("nombre");
-
-                clientesMap.put(nombreCliente, idCliente);
+                while (rs.next()) {
+                    int idCliente = rs.getInt("id_cliente");
+                    String nombreCliente = rs.getString("nombre");
+                    clientesMap.put(nombreCliente, idCliente);
+                }
             }
-
-            rs.close();
-            stmt.close();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al cargar clientes: " + e.getMessage());
         }
     }
 
-    private void configurarFiltroComboBox() {
-        configurarFiltroComboBox.addItem("Todas las órdenes");
-        configurarFiltroComboBox.addItem("Filtrar por cliente");
-        configurarFiltroComboBox.addItem("Filtrar por empleado");
-        configurarFiltroComboBox.addItem("Filtrar por producto");
-    }
+    /**
+     * Configura la tabla con las columnas necesarias.
+     */
     private void configurarTabla() {
         model = new DefaultTableModel(new String[]{
                 "ID Orden", "Cliente", "Empleado", "Producto", "Cantidad", "Total", "Estado", "Fecha"
         }, 0);
         table1.setModel(model);
     }
-    
 
+    /**
+     * Carga los productos desde la base de datos en los mapas correspondientes.
+     */
     private void cargarProductos() {
         try {
             String sql = "SELECT id_producto, nombre_producto, precio_producto FROM inventario_productos";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql)) {
 
-            while (rs.next()) {
-                int idProducto = rs.getInt("id_producto");
-                String nombreProducto = rs.getString("nombre_producto");
-                double precioProducto = rs.getDouble("precio_producto");
+                while (rs.next()) {
+                    int idProducto = rs.getInt("id_producto");
+                    String nombreProducto = rs.getString("nombre_producto");
+                    double precioProducto = rs.getDouble("precio_producto");
 
-                productosMap.put(nombreProducto, idProducto);
-                preciosProductos.put(idProducto, precioProducto);
+                    productosMap.put(nombreProducto, idProducto);
+                    preciosProductos.put(idProducto, precioProducto);
+                }
             }
-
-            rs.close();
-            stmt.close();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al cargar productos: " + e.getMessage());
         }
     }
+
     /**
      * Configura el listener para el campo de ID de orden.
      * Cuando el usuario ingresa un ID y presiona Enter, busca la orden automáticamente.
@@ -256,16 +460,17 @@ public class OrdenesCompraGUI {
     }
 
     /**
-     * Busca una orden por su ID y carga los datos en los campos correspondientes.
+     * Busca una orden por su ID y muestra sus detalles en los campos correspondientes.
      */
     private void buscarOrdenPorId() {
-        String idOrdenTexto = idOrdenCompra.getText().trim();
-        if (idOrdenTexto.isEmpty()) {
+        if (idOrdenCompra.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Por favor, ingrese un ID de orden válido");
             return;
         }
 
         try {
-            int idOrden = Integer.parseInt(idOrdenTexto);
+            int idOrden = Integer.parseInt(idOrdenCompra.getText().trim());
+            model.setRowCount(0); // Limpiar la tabla
 
             String sql = "SELECT oc.id_orden_compra, c.nombre as cliente, e.nombre as empleado, " +
                     "p.nombre_producto, rv.cantidad, oc.total, oc.estado_orden, oc.fecha_compra " +
@@ -276,51 +481,32 @@ public class OrdenesCompraGUI {
                     "LEFT JOIN registro_ventas rv ON oc.id_orden_compra = rv.id_orden_compra " +
                     "WHERE oc.id_orden_compra = ?";
 
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, idOrden);
-            ResultSet rs = pstmt.executeQuery();
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, idOrden);
+                ResultSet rs = pstmt.executeQuery();
 
-            if (rs.next()) {
-                // Cargar datos en los campos
-                ClienteTextField.setText(rs.getString("cliente"));
-                EmpleadoTextField.setText(rs.getString("empleado"));
-                ProductoTextField.setText(rs.getString("nombre_producto"));
+                if (rs.next()) {
+                    String cliente = rs.getString("cliente");
+                    String empleado = rs.getString("empleado");
+                    String producto = rs.getString("nombre_producto");
+                    int cantidad = rs.getInt("cantidad");
+                    if (cantidad == 0) cantidad = 1; // Si no hay registro en ventas
+                    double totalOrden = rs.getDouble("total");
+                    String estado = rs.getString("estado_orden");
+                    String fecha = rs.getString("fecha_compra");
 
-                int cantidad = rs.getInt("cantidad");
-                if (cantidad == 0) cantidad = 1;
-                cantidadTextField.setText(String.valueOf(cantidad));
-
-                total.setText(String.valueOf(rs.getDouble("total")));
-
-                String estado = rs.getString("estado_orden");
-                estadoTextField.setText(estado);
-
-
-                fechaCompra.setText(rs.getString("fecha_compra"));
-
-                // Resaltar la fila correspondiente en la tabla
-                for (int i = 0; i < model.getRowCount(); i++) {
-                    if (Integer.parseInt(model.getValueAt(i, 0).toString()) == idOrden) {
-                        table1.setRowSelectionInterval(i, i);
-                        table1.scrollRectToVisible(table1.getCellRect(i, 0, true));
-                        break;
-                    }
+                    model.addRow(new Object[]{idOrden, cliente, empleado, producto, cantidad, totalOrden, estado, fecha});
+                    table1.setRowSelectionInterval(0, 0); // Seleccionar la primera fila
+                    cargarDatosEnCampos(0);
+                } else {
+                    limpiarCampos();
+                    JOptionPane.showMessageDialog(null, "No se encontró ninguna orden con el ID: " + idOrden);
                 }
-            } else {
-                JOptionPane.showMessageDialog(mainPanel, "No se encontró una orden con el ID: " + idOrden,
-                        "Orden no encontrada", JOptionPane.INFORMATION_MESSAGE);
-                limpiarCampos();
             }
-
-            rs.close();
-            pstmt.close();
-
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(mainPanel, "Por favor, ingrese un número válido para el ID.",
-                    "Error de formato", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Por favor, ingrese un número válido para el ID de la orden");
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(mainPanel, "Error al buscar la orden: " + e.getMessage(),
-                    "Error de base de datos", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error al buscar la orden: " + e.getMessage());
         }
     }
 
@@ -329,42 +515,38 @@ public class OrdenesCompraGUI {
      * Crea los botones para actualizar estado y generar factura, y configura sus listeners.
      */
     private void configurarBotones() {
-        actualizarEstadoButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mostrarDialogoActualizarEstado();
+        actualizarEstadoButton.addActionListener(e -> mostrarDialogoActualizarEstado());
+
+        generarFacturaButton.addActionListener(e -> {
+            if (idOrdenCompra.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Por favor, seleccione una orden para generar factura");
+                return;
             }
+            generarFacturaPDF();
         });
 
-        generarFacturaButton.addActionListener(new ActionListener() {
+        buscarButton.addActionListener(e -> aplicarFiltro());
+
+        limpiarFiltrosButton.addActionListener(e -> {
+            filtroTextField.setText("");
+            cargarOrdenes();
+            limpiarCampos();
+        });
+
+        // Agregar este nuevo listener para detectar cuando se presiona Enter
+        filtroTextField.addKeyListener(new KeyAdapter() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                if (idOrdenCompra.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Por favor, seleccione una orden para generar factura");
-                    return;
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    aplicarFiltro();
                 }
-                generarFacturaPDF();
-            }
-        });
-
-        buscarButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                aplicarFiltro();
-            }
-        });
-
-        limpiarFiltrosButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                configurarFiltroComboBox.setSelectedIndex(0);
-                filtroTextField.setText("");
-                cargarOrdenes();
-                limpiarCampos();
             }
         });
     }
 
+    /**
+     * Carga todas las órdenes de compra en la tabla.
+     */
     private void cargarOrdenes() {
         model.setRowCount(0); // Limpiar la tabla
 
@@ -378,25 +560,23 @@ public class OrdenesCompraGUI {
                     "LEFT JOIN registro_ventas rv ON oc.id_orden_compra = rv.id_orden_compra " +
                     "ORDER BY oc.id_orden_compra DESC";
 
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql)) {
 
-            while (rs.next()) {
-                int idOrden = rs.getInt("id_orden_compra");
-                String cliente = rs.getString("cliente");
-                String empleado = rs.getString("empleado");
-                String producto = rs.getString("nombre_producto");
-                int cantidad = rs.getInt("cantidad");
-                if (cantidad == 0) cantidad = 1; // Si no hay registro en ventas
-                double totalOrden = rs.getDouble("total");
-                String estado = rs.getString("estado_orden");
-                String fecha = rs.getString("fecha_compra");
+                while (rs.next()) {
+                    int idOrden = rs.getInt("id_orden_compra");
+                    String cliente = rs.getString("cliente");
+                    String empleado = rs.getString("empleado");
+                    String producto = rs.getString("nombre_producto");
+                    int cantidad = rs.getInt("cantidad");
+                    if (cantidad == 0) cantidad = 1; // Si no hay registro en ventas
+                    double totalOrden = rs.getDouble("total");
+                    String estado = rs.getString("estado_orden");
+                    String fecha = rs.getString("fecha_compra");
 
-                model.addRow(new Object[]{idOrden, cliente, empleado, producto, cantidad, totalOrden, estado, fecha});
+                    model.addRow(new Object[]{idOrden, cliente, empleado, producto, cantidad, totalOrden, estado, fecha});
+                }
             }
-
-            rs.close();
-            stmt.close();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al cargar órdenes: " + e.getMessage());
         }
@@ -407,153 +587,21 @@ public class OrdenesCompraGUI {
      */
     private void aplicarFiltro() {
         String textoBusqueda = filtroTextField.getText().trim();
-        int opcionFiltro = configurarFiltroComboBox.getSelectedIndex();
 
-        if (textoBusqueda.isEmpty() && opcionFiltro != 0) {
+        if (textoBusqueda.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Por favor, ingrese un texto para filtrar");
             return;
         }
 
-        switch (opcionFiltro) {
-            case 0: // Todas las órdenes
-                cargarOrdenes();
-                break;
-            case 1: // Por cliente
-                filtrarPorCliente(textoBusqueda);
-                break;
-            case 2: // Por empleado
-                filtrarPorEmpleado(textoBusqueda);
-                break;
-            case 3: // Por producto
-                filtrarPorProducto(textoBusqueda);
-                break;
-        }
-    }
-
-    /**
-     * Filtra las órdenes por cliente.
-     * @param cliente Nombre del cliente para filtrar
-     */
-    private void filtrarPorCliente(String cliente) {
-        model.setRowCount(0); // Limpiar tabla
-
         try {
-            String sql = "SELECT oc.id_orden_compra, c.nombre as cliente, e.nombre as empleado, " +
-                    "p.nombre_producto, rv.cantidad, oc.total, oc.estado_orden, oc.fecha_compra " +
-                    "FROM ordenes_compra oc " +
-                    "JOIN clientes c ON oc.id_cliente = c.id_cliente " +
-                    "JOIN empleados e ON oc.id_empleado = e.id_empleado " +
-                    "JOIN inventario_productos p ON oc.id_producto = p.id_producto " +
-                    "LEFT JOIN registro_ventas rv ON oc.id_orden_compra = rv.id_orden_compra " +
-                    "WHERE c.nombre LIKE ? " +
-                    "ORDER BY oc.id_orden_compra DESC";
-
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, "%" + cliente + "%");
-            ResultSet rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                int idOrden = rs.getInt("id_orden_compra");
-                String clienteNombre = rs.getString("cliente");
-                String empleado = rs.getString("empleado");
-                String producto = rs.getString("nombre_producto");
-                int cantidad = rs.getInt("cantidad");
-                if (cantidad == 0) cantidad = 1; // Si no hay registro en ventas
-                double totalOrden = rs.getDouble("total");
-                String estado = rs.getString("estado_orden");
-                String fecha = rs.getString("fecha_compra");
-
-                model.addRow(new Object[]{
-                        idOrden, clienteNombre, empleado, producto, cantidad, totalOrden, estado, fecha
-                });
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al filtrar por cliente: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Filtra las órdenes por empleado.
-     * @param empleado Nombre del empleado para filtrar
-     */
-    // Completar el método filtrarPorEmpleado
-    private void filtrarPorEmpleado(String empleado) {
-        model.setRowCount(0); // Limpiar tabla
-
-        try {
-            String sql = "SELECT oc.id_orden_compra, c.nombre as cliente, e.nombre as empleado, " +
-                    "p.nombre_producto, rv.cantidad, oc.total, oc.estado_orden, oc.fecha_compra " +
-                    "FROM ordenes_compra oc " +
-                    "JOIN clientes c ON oc.id_cliente = c.id_cliente " +
-                    "JOIN empleados e ON oc.id_empleado = e.id_empleado " +
-                    "JOIN inventario_productos p ON oc.id_producto = p.id_producto " +
-                    "LEFT JOIN registro_ventas rv ON oc.id_orden_compra = rv.id_orden_compra " +
-                    "WHERE e.nombre LIKE ? " +
-                    "ORDER BY oc.id_orden_compra DESC";
-
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, "%" + empleado + "%");
-            ResultSet rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                int idOrden = rs.getInt("id_orden_compra");
-                String clienteNombre = rs.getString("cliente");
-                String empleadoNombre = rs.getString("empleado");
-                String producto = rs.getString("nombre_producto");
-                int cantidad = rs.getInt("cantidad");
-                if (cantidad == 0) cantidad = 1; // Si no hay registro en ventas
-                double totalOrden = rs.getDouble("total");
-                String estado = rs.getString("estado_orden");
-                String fecha = rs.getString("fecha_compra");
-
-                model.addRow(new Object[]{
-                        idOrden, clienteNombre, empleadoNombre, producto, cantidad, totalOrden, estado, fecha
-                });
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al filtrar por empleado: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Filtra las órdenes por producto.
-     * @param producto Nombre del producto para filtrar
-     */
-    private void filtrarPorProducto(String producto) {
-        model.setRowCount(0); // Limpiar tabla
-
-        try {
-            String sql = "SELECT oc.id_orden_compra, c.nombre as cliente, e.nombre as empleado, " +
-                    "p.nombre_producto, rv.cantidad, oc.total, oc.estado_orden, oc.fecha_compra " +
-                    "FROM ordenes_compra oc " +
-                    "JOIN clientes c ON oc.id_cliente = c.id_cliente " +
-                    "JOIN empleados e ON oc.id_empleado = e.id_empleado " +
-                    "JOIN inventario_productos p ON oc.id_producto = p.id_producto " +
-                    "LEFT JOIN registro_ventas rv ON oc.id_orden_compra = rv.id_orden_compra " +
-                    "WHERE p.nombre_producto LIKE ? " +
-                    "ORDER BY oc.id_orden_compra DESC";
-
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, "%" + producto + "%");
-            ResultSet rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                int idOrden = rs.getInt("id_orden_compra");
-                String clienteNombre = rs.getString("cliente");
-                String empleado = rs.getString("empleado");
-                String productoNombre = rs.getString("nombre_producto");
-                int cantidad = rs.getInt("cantidad");
-                if (cantidad == 0) cantidad = 1; // Si no hay registro en ventas
-                double totalOrden = rs.getDouble("total");
-                String estado = rs.getString("estado_orden");
-                String fecha = rs.getString("fecha_compra");
-
-                model.addRow(new Object[]{
-                        idOrden, clienteNombre, empleado, productoNombre, cantidad, totalOrden, estado, fecha
-                });
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al filtrar por producto: " + e.getMessage());
+            int idOrden = Integer.parseInt(textoBusqueda);
+            // Si se puede convertir a entero, buscamos por ID
+            idOrdenCompra.setText(textoBusqueda);
+            buscarOrdenPorId();
+        } catch (NumberFormatException e) {
+            // Si no es un número, mostrar mensaje
+            JOptionPane.showMessageDialog(null, "Por favor, ingrese un número válido para el ID de la orden.",
+                    "Formato incorrecto", JOptionPane.WARNING_MESSAGE);
         }
     }
 
@@ -568,10 +616,7 @@ public class OrdenesCompraGUI {
         ProductoTextField.setText(table1.getValueAt(row, 3).toString());
         cantidadTextField.setText(table1.getValueAt(row, 4).toString());
         total.setText(table1.getValueAt(row, 5).toString());
-
-        // Asignar el estado directamente al estadoTextField
         estadoTextField.setText(table1.getValueAt(row, 6).toString());
-
         fechaCompra.setText(table1.getValueAt(row, 7).toString());
     }
 
@@ -585,9 +630,9 @@ public class OrdenesCompraGUI {
         ProductoTextField.setText("");
         cantidadTextField.setText("");
         total.setText("");
+        estadoTextField.setText("");
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         fechaCompra.setText(dateFormat.format(new Date()));
-        estadoTextField.getSelectedText();
         table1.clearSelection();
     }
 
@@ -599,26 +644,26 @@ public class OrdenesCompraGUI {
     private void actualizarEstadoOrden(int idOrden, String nuevoEstado) {
         try {
             String sql = "UPDATE ordenes_compra SET estado_orden = ? WHERE id_orden_compra = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, nuevoEstado);
-            pstmt.setInt(2, idOrden);
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, nuevoEstado);
+                pstmt.setInt(2, idOrden);
 
-            int filasAfectadas = pstmt.executeUpdate();
+                int filasAfectadas = pstmt.executeUpdate();
 
-            if (filasAfectadas > 0) {
-                // La actualización fue exitosa
-                cargarOrdenes(); // Refrescar la tabla
-            } else {
-                JOptionPane.showMessageDialog(null, "No se pudo actualizar el estado de la orden.");
+                if (filasAfectadas > 0) {
+                    // La actualización fue exitosa
+                    cargarOrdenes(); // Refrescar la tabla
+                    // Actualizar el campo de estado en la interfaz
+                    estadoTextField.setText(nuevoEstado);
+                } else {
+                    JOptionPane.showMessageDialog(null, "No se pudo actualizar el estado de la orden.");
+                }
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al actualizar estado: " + e.getMessage());
         }
     }
 
-    /**
-     * Crea y muestra un diálogo modal para actualizar el estado de una orden.
-     */
     /**
      * Muestra un diálogo modal para actualizar el estado de una orden de compra seleccionada.
      * Verifica si hay una orden seleccionada, muestra el estado actual y permite elegir un nuevo estado
@@ -637,29 +682,30 @@ public class OrdenesCompraGUI {
         dialog.setSize(400, 200);
         dialog.setLocationRelativeTo(mainPanel);
 
+        // Panel de contenido
         JPanel contentPanel = new JPanel(new GridLayout(3, 2, 10, 10));
         contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Agregar campo de ID de orden
+        // Campo de ID de orden
         contentPanel.add(new JLabel("Orden ID:"));
         JTextField idOrdenField = new JTextField(idOrdenCompra.getText());
         idOrdenField.setEditable(false);
         contentPanel.add(idOrdenField);
 
-        // Agregar campo de estado actual (desde estadoTextField)
+        // Campo de estado actual
         contentPanel.add(new JLabel("Estado Actual:"));
-        JTextField estadoActualField = new JTextField(estadoTextField.getText()); // ← se usa .getText() correctamente
+        JTextField estadoActualField = new JTextField(estadoTextField.getText());
         estadoActualField.setEditable(false);
         contentPanel.add(estadoActualField);
 
-        // Agregar combo para nuevo estado
+        // ComboBox para seleccionar el nuevo estado
         contentPanel.add(new JLabel("Nuevo Estado:"));
         JComboBox<String> nuevoEstadoComboBox = new JComboBox<>();
         nuevoEstadoComboBox.addItem("pendiente");
         nuevoEstadoComboBox.addItem("pagada");
         nuevoEstadoComboBox.addItem("enviada");
 
-        // Selecciona el estado actual por defecto
+        // Seleccionar el estado actual por defecto
         nuevoEstadoComboBox.setSelectedItem(estadoTextField.getText());
         contentPanel.add(nuevoEstadoComboBox);
 
@@ -671,192 +717,238 @@ public class OrdenesCompraGUI {
         JButton cancelarButton = new JButton("Cancelar");
 
         // Listener para el botón Guardar
-        guardarButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String nuevoEstado = nuevoEstadoComboBox.getSelectedItem().toString();
-                int idOrden = Integer.parseInt(idOrdenField.getText());
+        guardarButton.addActionListener(e -> {
+            String nuevoEstado = nuevoEstadoComboBox.getSelectedItem().toString();
+            int idOrden = Integer.parseInt(idOrdenField.getText());
 
-                actualizarEstadoOrden(idOrden, nuevoEstado);
-                dialog.dispose();
-            }
+            // Actualizar el estado en la base de datos
+            actualizarEstadoOrden(idOrden, nuevoEstado);
+
+            // Cerrar el diálogo
+            dialog.dispose();
         });
 
         // Listener para el botón Cancelar
-        cancelarButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dialog.dispose();
-            }
-        });
+        cancelarButton.addActionListener(e -> dialog.dispose());
 
         buttonPanel.add(guardarButton);
         buttonPanel.add(cancelarButton);
         dialog.add(buttonPanel, BorderLayout.SOUTH);
 
+        // Mostrar el diálogo
         dialog.setVisible(true);
     }
 
-
     /**
-     * Genera una factura en formato PDF para la orden seleccionada.
-     * Incluye detalles del cliente, producto, empleado y valores de la compra.
+     * Genera una factura en formato PDF para la orden de compra seleccionada.
+     * La factura incluye encabezado con logo, datos del cliente, detalles de la compra,
+     * cálculo de IVA y totales.
      */
     private void generarFacturaPDF() {
         try {
-            // Obtener la ruta para guardar el PDF
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setDialogTitle("Guardar Factura PDF");
-            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int idOrden = Integer.parseInt(idOrdenCompra.getText().trim());
+            OrdenDetalle ordenDetalle = obtenerDetalleOrden(idOrden);
 
-            int userSelection = fileChooser.showSaveDialog(mainPanel);
-
-            if (userSelection != JFileChooser.APPROVE_OPTION) {
-                return; // El usuario canceló la operación
+            if (ordenDetalle == null) {
+                JOptionPane.showMessageDialog(null, "No se encontraron los detalles de la orden");
+                return;
             }
 
-            // Obtener la ruta seleccionada
-            String path = fileChooser.getSelectedFile().getAbsolutePath();
-            int idOrden = Integer.parseInt(idOrdenCompra.getText());
-            String fileName = path + File.separator + "Factura_" + idOrden + ".pdf";
-
-            // Crear el documento PDF
-            Document document = new Document();
-            PdfWriter.getInstance(document, new FileOutputStream(fileName));
-            document.open();
-
-            // Obtener datos detallados de la orden desde la base de datos
-            String sql = "SELECT oc.id_orden_compra, c.nombre as cliente, c.direccion, c.telefono, " +
-                    "e.nombre as empleado, p.nombre_producto, p.precio_producto, rv.cantidad, " +
-                    "oc.total, oc.estado_orden, oc.fecha_compra " +
-                    "FROM ordenes_compra oc " +
-                    "JOIN clientes c ON oc.id_cliente = c.id_cliente " +
-                    "JOIN empleados e ON oc.id_empleado = e.id_empleado " +
-                    "JOIN inventario_productos p ON oc.id_producto = p.id_producto " +
-                    "LEFT JOIN registro_ventas rv ON oc.id_orden_compra = rv.id_orden_compra " +
-                    "WHERE oc.id_orden_compra = ?";
-
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, idOrden);
-            ResultSet rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                // Datos para la factura
-                String cliente = rs.getString("cliente");
-                String direccion = rs.getString("direccion");
-                String telefono = rs.getString("telefono");
-                String empleado = rs.getString("empleado");
-                String producto = rs.getString("nombre_producto");
-                double precioUnitario = rs.getDouble("precio_producto");
-                int cantidad = rs.getInt("cantidad");
-                if (cantidad == 0) cantidad = 1; // Si no hay registro en ventas
-                double totalOrden = rs.getDouble("total");
-                String estado = rs.getString("estado_orden");
-                String fecha = rs.getString("fecha_compra");
-
-                // Encabezado de la factura
-                Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
-                Font subtitleFont = new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD);
-                Font normalFont = new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL);
-                Font smallFont = new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL);
-
-                // Título
-                Paragraph title = new Paragraph("FACTURA DE COMPRA", titleFont);
-                title.setAlignment(Element.ALIGN_CENTER);
-                document.add(title);
-                document.add(new Paragraph(" "));
-
-                // Información de la empresa
-                Paragraph companyInfo = new Paragraph("FERRETERÍA FUTURE SOFT", subtitleFont);
-                companyInfo.setAlignment(Element.ALIGN_CENTER);
-                document.add(companyInfo);
-
-                Paragraph companyAddress = new Paragraph("Dirección: Sede Sagrado ", normalFont);
-                companyAddress.setAlignment(Element.ALIGN_CENTER);
-                document.add(companyAddress);
-
-                Paragraph companyPhone = new Paragraph("Teléfono: 3172847523", normalFont);
-                companyPhone.setAlignment(Element.ALIGN_CENTER);
-                document.add(companyPhone);
-
-                document.add(new Paragraph(" "));
-                document.add(new Paragraph("FACTURA N°: " + idOrden, subtitleFont));
-                document.add(new Paragraph("Fecha: " + fecha, normalFont));
-                document.add(new Paragraph("Estado: " + estado, normalFont));
-                document.add(new Paragraph(" "));
-
-                // Información del cliente
-                document.add(new Paragraph("DATOS DEL CLIENTE", subtitleFont));
-                document.add(new Paragraph("Nombre: " + cliente, normalFont));
-                document.add(new Paragraph("Dirección: " + direccion, normalFont));
-                document.add(new Paragraph("Teléfono: " + telefono, normalFont));
-                document.add(new Paragraph(" "));
-
-                // Información del vendedor
-                document.add(new Paragraph("ATENDIDO POR", subtitleFont));
-                document.add(new Paragraph("Empleado: " + empleado, normalFont));
-                document.add(new Paragraph(" "));
-
-                // Detalles de la compra
-                document.add(new Paragraph("DETALLES DE LA COMPRA", subtitleFont));
-
-                PdfPTable table = new PdfPTable(4);
-                table.setWidthPercentage(100);
-                table.setSpacingBefore(10f);
-                table.setSpacingAfter(10f);
-
-                // Encabezados de la tabla
-                PdfPCell cell1 = new PdfPCell(new Paragraph("Producto", normalFont));
-                PdfPCell cell2 = new PdfPCell(new Paragraph("Precio Unitario", normalFont));
-                PdfPCell cell3 = new PdfPCell(new Paragraph("Cantidad", normalFont));
-                PdfPCell cell4 = new PdfPCell(new Paragraph("Subtotal", normalFont));
-
-                cell1.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                cell2.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                cell3.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                cell4.setBackgroundColor(BaseColor.LIGHT_GRAY);
-
-                table.addCell(cell1);
-                table.addCell(cell2);
-                table.addCell(cell3);
-                table.addCell(cell4);
-
-                // Fila con datos del producto
-                table.addCell(producto);
-                table.addCell(String.format("$%.2f", precioUnitario));
-                table.addCell(String.valueOf(cantidad));
-                table.addCell(String.format("$%.2f", precioUnitario * cantidad));
-
-                document.add(table);
-
-                // Total
-                PdfPTable totalTable = new PdfPTable(2);
-                totalTable.setWidthPercentage(50);
-                totalTable.setHorizontalAlignment(Element.ALIGN_RIGHT);
-
-                totalTable.addCell(new PdfPCell(new Paragraph("TOTAL:", subtitleFont)));
-                totalTable.addCell(new PdfPCell(new Paragraph(String.format("$%.2f", totalOrden), subtitleFont)));
-
-                document.add(totalTable);
-
-                // Pie de página
-                document.add(new Paragraph(" "));
-                document.add(new Paragraph(" "));
-                Paragraph thanks = new Paragraph("¡Gracias por su compra en future soft !", normalFont);
-                thanks.setAlignment(Element.ALIGN_CENTER);
-                document.add(thanks);
-
-                Paragraph footer = new Paragraph("Esta factura sirve como comprobante de pago", smallFont);
-                footer.setAlignment(Element.ALIGN_CENTER);
-                document.add(footer);
-
-                JOptionPane.showMessageDialog(null, "Factura generada exitosamente en: " + fileName);
-            } else {
-                JOptionPane.showMessageDialog(null, "No se encontraron datos para la orden seleccionada.");
+            // Verificar si el estado permite generar factura
+            if ("pendiente".equals(ordenDetalle.getEstado())) {
+                int respuesta = JOptionPane.showConfirmDialog(null,
+                        "La orden está en estado Pendiente. ¿Desea generar la factura de todos modos?",
+                        "Confirmación", JOptionPane.YES_NO_OPTION);
+                if (respuesta != JOptionPane.YES_OPTION) {
+                    return;
+                }
             }
 
-            document.close();
+            // Configurar el documento
+            Document documento = new Document(PageSize.A4);
+            String rutaDescargas = System.getProperty("user.home") + File.separator + "Downloads";
+            String nombreArchivo = "Factura_" + idOrden + ".pdf";
+            String rutaArchivo = rutaDescargas + File.separator + nombreArchivo;
 
+            PdfWriter.getInstance(documento, new FileOutputStream(rutaArchivo));
+            documento.open();
+
+            // Definir fuentes
+            Font fontTitulo = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD, BaseColor.BLACK);
+            Font fontSubtitulo = new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD, BaseColor.BLACK);
+            Font fontNormal = new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL, BaseColor.BLACK);
+            Font fontNegrita = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.BLACK);
+            Font fontPequeña = new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL, BaseColor.BLACK);
+
+            // Agregar logo
+            try {
+                Image logo = Image.getInstance("resources/Img/icono.png");
+                logo.scaleToFit(150, 150);
+                logo.setAbsolutePosition(40, documento.getPageSize().getHeight() - 110);
+                documento.add(logo);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "No se pudo cargar el logo: " + e.getMessage());
+            }
+
+            // Título y datos de la empresa
+            Paragraph titulo = new Paragraph();
+            addEmptyLine(titulo, 5); // Espacio para el logo
+            titulo.add(new Paragraph("FERRETERÍA Future soft", fontTitulo));
+            titulo.add(new Paragraph("NIT: 900.123.456-7", fontNormal));
+            titulo.add(new Paragraph("Sede Sagrado", fontNormal));
+            titulo.add(new Paragraph("Teléfono: (57) 123-4567", fontNormal));
+            titulo.add(new Paragraph("Email: contacto@ferreteriafuturesotf.com", fontNormal));
+            titulo.setAlignment(Element.ALIGN_RIGHT);
+            documento.add(titulo);
+
+            // Datos de la factura
+            Paragraph datosFactura = new Paragraph();
+            addEmptyLine(datosFactura, 2);
+            datosFactura.add(new Paragraph("FACTURA DE VENTA", fontSubtitulo));
+            datosFactura.add(new Paragraph("No. " + idOrden, fontSubtitulo));
+            datosFactura.add(new Paragraph("Fecha: " + ordenDetalle.getFecha(), fontNormal));
+            datosFactura.setAlignment(Element.ALIGN_CENTER);
+            documento.add(datosFactura);
+
+            // Datos del cliente
+            Paragraph datosCliente = new Paragraph();
+            addEmptyLine(datosCliente, 1);
+            datosCliente.add(new Paragraph("DATOS DEL CLIENTE", fontNegrita));
+            datosCliente.add(new Paragraph("Cliente: " + ordenDetalle.getCliente(), fontNormal));
+            datosCliente.add(new Paragraph("Dirección: " + ordenDetalle.getDireccion(), fontNormal));
+            datosCliente.add(new Paragraph("Teléfono: " + ordenDetalle.getTelefono(), fontNormal));
+            documento.add(datosCliente);
+
+            // Tabla de productos
+            addEmptyLine(new Paragraph(), 1);
+            documento.add(new Paragraph("DETALLE DE PRODUCTOS", fontNegrita));
+
+            PdfPTable tabla = new PdfPTable(5);
+            tabla.setWidthPercentage(100);
+            tabla.setSpacingBefore(10f);
+            tabla.setSpacingAfter(10f);
+
+            float[] columnWidths = {1.5f, 1f, 1f, 1f, 1f};
+            tabla.setWidths(columnWidths);
+
+            // Encabezados de la tabla
+            PdfPCell cell = new PdfPCell(new Phrase("Descripción", fontNegrita));
+            cell.setBackgroundColor(new BaseColor(220, 220, 220));
+            cell.setPadding(5);
+            tabla.addCell(cell);
+
+            cell = new PdfPCell(new Phrase("Cantidad", fontNegrita));
+            cell.setBackgroundColor(new BaseColor(220, 220, 220));
+            cell.setPadding(5);
+            tabla.addCell(cell);
+
+            cell = new PdfPCell(new Phrase("Precio Unit.", fontNegrita));
+            cell.setBackgroundColor(new BaseColor(220, 220, 220));
+            cell.setPadding(5);
+            tabla.addCell(cell);
+
+            cell = new PdfPCell(new Phrase("IVA (19%)", fontNegrita));
+            cell.setBackgroundColor(new BaseColor(220, 220, 220));
+            cell.setPadding(5);
+            tabla.addCell(cell);
+
+            cell = new PdfPCell(new Phrase("Total", fontNegrita));
+            cell.setBackgroundColor(new BaseColor(220, 220, 220));
+            cell.setPadding(5);
+            tabla.addCell(cell);
+
+            // Agregar todos los productos a la tabla
+            double subtotal = 0;
+            double ivaTotal = 0;
+            double granTotal = 0;
+
+            for (ProductoOrden producto : ordenDetalle.getProductos()) {
+                // Datos del producto
+                tabla.addCell(new Phrase(producto.getNombre(), fontNormal));
+                tabla.addCell(new Phrase(String.valueOf(producto.getCantidad()), fontNormal));
+                tabla.addCell(new Phrase(String.format("%.2f", producto.getPrecioUnitario()), fontNormal));
+
+                // Cálculo del IVA por producto
+                double ivaProducto = producto.getIva();
+                tabla.addCell(new Phrase(String.format("%.2f", ivaProducto), fontNormal));
+
+                // Total por producto
+                double totalProducto = producto.getTotal();
+                tabla.addCell(new Phrase(String.format("%.2f", totalProducto), fontNormal));
+
+                // Actualizar totales
+                subtotal += producto.getPrecioUnitario() * producto.getCantidad();
+                ivaTotal += ivaProducto;
+                granTotal += totalProducto;
+            }
+
+            documento.add(tabla);
+
+            // Resumen de totales
+            Paragraph resumen = new Paragraph();
+            addEmptyLine(resumen, 1);
+
+            PdfPTable tablaTotales = new PdfPTable(2);
+            tablaTotales.setWidthPercentage(40);
+            tablaTotales.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            tablaTotales.setSpacingBefore(10f);
+
+            tablaTotales.addCell(new Phrase("Subtotal:", fontNegrita));
+            tablaTotales.addCell(new Phrase(String.format("$%.2f", subtotal), fontNormal));
+
+            tablaTotales.addCell(new Phrase("IVA (19%):", fontNegrita));
+            tablaTotales.addCell(new Phrase(String.format("$%.2f", ivaTotal), fontNormal));
+
+            tablaTotales.addCell(new Phrase("TOTAL:", fontNegrita));
+            cell = new PdfPCell(new Phrase(String.format("$%.2f", granTotal), fontNegrita));
+            cell.setBackgroundColor(new BaseColor(220, 220, 220));
+            tablaTotales.addCell(cell);
+
+            documento.add(tablaTotales);
+
+            // Información adicional
+            Paragraph infoAdicional = new Paragraph();
+            addEmptyLine(infoAdicional, 2);
+            infoAdicional.add(new Paragraph("INFORMACIÓN ADICIONAL", fontNegrita));
+            infoAdicional.add(new Paragraph("Estado de la orden: " + ordenDetalle.getEstado(), fontNormal));
+            infoAdicional.add(new Paragraph("Atendido por: " + ordenDetalle.getEmpleado(), fontNormal));
+            documento.add(infoAdicional);
+
+            // Notas y condiciones
+            Paragraph notas = new Paragraph();
+            addEmptyLine(notas, 2);
+            notas.add(new Paragraph("NOTAS Y CONDICIONES", fontNegrita));
+            notas.add(new Paragraph("- Esta factura es un título valor según la ley.", fontPequeña));
+            notas.add(new Paragraph("- La garantía de los productos es de 30 días.", fontPequeña));
+            notas.add(new Paragraph("- No se aceptan devoluciones después de 15 días.", fontPequeña));
+            documento.add(notas);
+
+            // Pie de página
+            Paragraph footer = new Paragraph();
+            addEmptyLine(footer, 2);
+            footer.add(new Paragraph("¡Gracias por su compra!", fontNormal));
+            footer.setAlignment(Element.ALIGN_CENTER);
+            documento.add(footer);
+
+            // Cerrar el documento
+            documento.close();
+
+            JOptionPane.showMessageDialog(null, "Factura generada correctamente.\nGuardada en: " + rutaArchivo);
+
+            // Abrir el archivo automáticamente
+            try {
+                File pdfFile = new File(rutaArchivo);
+                if (pdfFile.exists()) {
+                    if (Desktop.isDesktopSupported()) {
+                        Desktop.getDesktop().open(pdfFile);
+                    } else {
+                        JOptionPane.showMessageDialog(null,
+                                "No se puede abrir automáticamente. El archivo está en: " + rutaArchivo);
+                    }
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Error al abrir el archivo: " + ex.getMessage());
+            }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error al generar la factura: " + e.getMessage());
             e.printStackTrace();
@@ -864,28 +956,25 @@ public class OrdenesCompraGUI {
     }
 
     /**
-     * Método principal para ejecutar la aplicación.
-     * Crea una instancia de la clase y muestra la ventana principal.
+     * Método principal para iniciar la aplicación.
+     * Crea una instancia de JFrame y añade el panel principal de OrdenesCompraGUI.
      * @param args Argumentos de línea de comandos (no utilizados)
      */
     public static void main(String[] args) {
-        try {
-            // Establecer look and feel del sistema
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                JFrame frame = new JFrame("Gestión de Órdenes de Compra");
-                frame.setContentPane(new OrdenesCompraGUI().getMainPanel());
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.setSize(1200, 700);
-                frame.setLocationRelativeTo(null);
-                frame.setVisible(true);
+        SwingUtilities.invokeLater(() -> {
+            try {
+                // Establecer el look and feel del sistema operativo
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
+            JFrame frame = new JFrame("Gestión de Órdenes de Compra");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setContentPane(new OrdenesCompraGUI().getMainPanel());
+            frame.setSize(1024, 768);
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
         });
     }
 }
