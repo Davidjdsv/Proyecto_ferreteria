@@ -15,6 +15,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * @author davin
+ * Clase ClientesGUI que representa la interfaz gráfica de gestión de clientes.
+ * Permite agregar, actualizar, eliminar y visualizar clientes en una tabla.
+ */
 public class ClientesGUI {
     private JPanel main;
     private JTable table1;
@@ -29,19 +34,26 @@ public class ClientesGUI {
     private JButton volverAlMenuButton;
 
     ClientesDAO ClientesDAO = new ClientesDAO();
-
     ConexionDB ConexionDB = new ConexionDB();
 
-    int filas = 0 ;
+    int filas = 0;
 
-
+    /**
+     * Retorna el panel principal de la interfaz.
+     * @return JPanel principal de la GUI.
+     */
     public JPanel getMainPanel() {
-        return main; // Return the actual main panel instead of null
+        return main;
     }
 
+    /**
+     * Constructor de la clase ClientesGUI.
+     * Inicializa la interfaz, carga los datos y configura los eventos de los botones y la tabla.
+     */
     public ClientesGUI() {
         mostrar();
         textField1.setEnabled(false);
+
         agregarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -54,7 +66,6 @@ public class ClientesGUI {
                 ClientesDAO.agregar(Clientes);
 
                 mostrar();
-
             }
         });
 
@@ -65,10 +76,9 @@ public class ClientesGUI {
                 ClientesDAO.eliminar(id);
 
                 mostrar();
-
-
             }
         });
+
         actualizarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -82,7 +92,6 @@ public class ClientesGUI {
                 ClientesDAO.actualizar(Clientes);
 
                 mostrar();
-
             }
         });
 
@@ -105,8 +114,10 @@ public class ClientesGUI {
         });
     }
 
-    public void mostrar ()
-    {
+    /**
+     * Método que carga y muestra los datos de los clientes en la tabla.
+     */
+    public void mostrar() {
         DefaultTableModel model = new DefaultTableModel();
         model.addColumn("ID cliente");
         model.addColumn("Nombre");
@@ -120,11 +131,10 @@ public class ClientesGUI {
 
         try {
             Statement stat = con.createStatement();
-            String  query = "SELECT * FROM clientes";
+            String query = "SELECT * FROM clientes";
             ResultSet fb = stat.executeQuery(query);
 
-            while (fb.next())
-            {
+            while (fb.next()) {
                 dato[0] = fb.getString(1);
                 dato[1] = fb.getString(2);
                 dato[2] = fb.getString(3);
@@ -132,16 +142,15 @@ public class ClientesGUI {
                 dato[4] = fb.getString(5);
                 model.addRow(dato);
             }
-        }
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-
-
-
+    /**
+     * Método principal para ejecutar la aplicación.
+     * @param args Argumentos de línea de comandos.
+     */
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(new FlatArcDarkIJTheme());
@@ -154,7 +163,7 @@ public class ClientesGUI {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        frame.setSize(1006,550);
+        frame.setSize(1006, 550);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
     }
