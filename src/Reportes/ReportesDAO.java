@@ -9,24 +9,18 @@ import java.io.IOException;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.*;
+import java.awt.Desktop;
+import java.io.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * Clase que maneja la generación y exportación de reportes del sistema de ferretería.
  * Permite generar diferentes tipos de reportes y exportarlos a PDF.
  *
  * @author Cristian Restrepo
- * @version 1.0
+ * @version 1.1
  */
 public class ReportesDAO {
     private Connection conexion;
@@ -60,8 +54,6 @@ public class ReportesDAO {
 
         try {
             String sql = "";
-            String groupBy = "";
-            String dateFormat = "";
 
             switch (periodo.toLowerCase()) {
                 case "diario":
@@ -136,12 +128,12 @@ public class ReportesDAO {
 
         try {
             String sql = "SELECT p.id_producto, p.nombre_producto, p.categoria, " +
-                    "COUNT(o.id_orden_compra) as num_ventas, " +
-                    "SUM(o.total) as total_generado " +
+                    "SUM(rv.cantidad) as cantidad_vendida, " +
+                    "SUM(rv.sub_total) as total_generado " +
                     "FROM inventario_productos p " +
-                    "JOIN ordenes_compra o ON p.id_producto = o.id_producto " +
+                    "JOIN registro_ventas rv ON p.id_producto = rv.id_producto " +
                     "GROUP BY p.id_producto, p.nombre_producto, p.categoria " +
-                    "ORDER BY num_ventas DESC, total_generado DESC " +
+                    "ORDER BY cantidad_vendida DESC, total_generado DESC " +
                     "LIMIT ?";
 
             PreparedStatement stmt = conexion.prepareStatement(sql);
@@ -153,7 +145,7 @@ public class ReportesDAO {
                         rs.getInt("id_producto"),
                         rs.getString("nombre_producto"),
                         rs.getString("categoria"),
-                        rs.getInt("num_ventas"),
+                        rs.getInt("cantidad_vendida"),
                         String.format("$%.2f", rs.getDouble("total_generado"))
                 };
                 tableModel.addRow(row);
@@ -180,10 +172,8 @@ public class ReportesDAO {
         configurarColumnas(new String[]{"ID Cliente", "Nombre Cliente", "Compras Realizadas", "Total Gastado", "Última Compra"});
 
         try {
-
-            //  La tabla clientes con id_cliente y nombre
             String sql = "SELECT c.id_cliente, c.nombre as nombre_cliente, " +
-                    "COUNT(o.id_orden_compra) as num_compras, " +
+                    "COUNT(DISTINCT o.id_orden_compra) as num_compras, " +
                     "SUM(o.total) as total_gastado, " +
                     "MAX(o.fecha_compra) as ultima_compra " +
                     "FROM clientes c " +
@@ -272,19 +262,19 @@ public class ReportesDAO {
     }
 
     /**
-     * Exporta el reporte actual a un archivo PDF usando la biblioteca iText.
+     * Exporta el reporte actual como factura a un archivo PDF usando la biblioteca iText.
      * Permite al usuario seleccionar la ubicación donde guardar el archivo.
      *
      * @param tipoReporte Tipo de reporte que se está exportando
      * @param nombreEmpleado Nombre del empleado que genera el reporte
      */
-    public void exportarReporteActualAPDF(String tipoReporte, String nombreEmpleado) {
+    public void generarFacturaPDF(String tipoReporte, String nombreEmpleado) {
         try {
             // Crear el diálogo para seleccionar dónde guardar el archivo
             JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setDialogTitle("Guardar reporte PDF");
+            fileChooser.setDialogTitle("Guardar factura PDF");
             fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            fileChooser.setSelectedFile(new File(tipoReporte.replace(" ", "_") + ".pdf"));
+            fileChooser.setSelectedFile(new File("Factura_" + tipoReporte.replace(" ", "_") + ".pdf"));
 
             if (fileChooser.showSaveDialog(null) != JFileChooser.APPROVE_OPTION) {
                 return;
@@ -296,77 +286,206 @@ public class ReportesDAO {
                 rutaArchivo += ".pdf";
             }
 
-            // Inicializar documento PDF
+            // Configurar el documento
             Document documento = new Document(PageSize.A4);
             PdfWriter.getInstance(documento, new FileOutputStream(rutaArchivo));
             documento.open();
 
-            // Agregar título del reporte
-            Font fontTitulo = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD);
-            Paragraph titulo = new Paragraph("Reporte: " + tipoReporte, fontTitulo);
-            titulo.setAlignment(Element.ALIGN_CENTER);
+            // Definir fuentes
+            Font fontTitulo = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD, BaseColor.BLACK);
+            Font fontSubtitulo = new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD, BaseColor.BLACK);
+            Font fontNormal = new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL, BaseColor.BLACK);
+            Font fontNegrita = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.BLACK);
+            Font fontPequeña = new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL, BaseColor.BLACK);
+
+            // Agregar logo
+            try {
+                Image logo = Image.getInstance("resources/Img/icono.png");
+                logo.scaleToFit(150, 150);
+                logo.setAbsolutePosition(40, documento.getPageSize().getHeight() - 110);
+                documento.add(logo);
+            } catch (Exception e) {
+                System.out.println("No se pudo cargar el logo: " + e.getMessage());
+                // No mostrar mensaje al usuario para no interrumpir la generación del PDF
+            }
+
+            // Título y datos de la empresa
+            Paragraph titulo = new Paragraph();
+            addEmptyLine(titulo, 5); // Espacio para el logo
+            titulo.add(new Paragraph("FERRETERÍA Future soft", fontTitulo));
+            titulo.add(new Paragraph("NIT: 900.123.456-7", fontNormal));
+            titulo.add(new Paragraph("Sede Sagrado", fontNormal));
+            titulo.add(new Paragraph("Teléfono: (57) 123-4567", fontNormal));
+            titulo.add(new Paragraph("Email: contacto@ferreteriafuturesotf.com", fontNormal));
+            titulo.setAlignment(Element.ALIGN_RIGHT);
             documento.add(titulo);
 
-            // Agregar información del reporte
-            Font fontNormal = new Font(Font.FontFamily.HELVETICA, 12);
+            // Datos de la factura
+            Paragraph datosFactura = new Paragraph();
+            addEmptyLine(datosFactura, 2);
+            datosFactura.add(new Paragraph("FACTURA DE " + tipoReporte.toUpperCase(), fontSubtitulo));
+
+            // Obtener un ID único para la factura (puede ser con timestamp o un contador)
+            SimpleDateFormat sdfId = new SimpleDateFormat("yyyyMMddHHmmss");
+            String idFactura = sdfId.format(new Date());
+            datosFactura.add(new Paragraph("No. " + idFactura, fontSubtitulo));
+
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            datosFactura.add(new Paragraph("Fecha: " + sdf.format(new Date()), fontNormal));
+            datosFactura.setAlignment(Element.ALIGN_CENTER);
+            documento.add(datosFactura);
 
-            Paragraph fechaParrafo = new Paragraph("Fecha de generación: " + sdf.format(new Date()), fontNormal);
-            fechaParrafo.setSpacingBefore(10);
-            documento.add(fechaParrafo);
-
+            // Datos del cliente/usuario que genera el reporte
+            Paragraph datosUsuario = new Paragraph();
+            addEmptyLine(datosUsuario, 1);
+            datosUsuario.add(new Paragraph("DATOS DEL SOLICITANTE", fontNegrita));
             if (nombreEmpleado != null && !nombreEmpleado.isEmpty() && !nombreEmpleado.startsWith("Seleccione")) {
-                Paragraph empleadoParrafo = new Paragraph("Generado por: " + nombreEmpleado, fontNormal);
-                documento.add(empleadoParrafo);
+                datosUsuario.add(new Paragraph("Generado por: " + nombreEmpleado, fontNormal));
+            } else {
+                datosUsuario.add(new Paragraph("Generado por: Usuario del sistema", fontNormal));
             }
+            datosUsuario.add(new Paragraph("Tipo de reporte: " + tipoReporte, fontNormal));
+            documento.add(datosUsuario);
 
-            documento.add(new Paragraph(" ")); // Espacio
+            // Tabla de contenido del reporte
+            addEmptyLine(new Paragraph(), 1);
+            documento.add(new Paragraph("DETALLE DEL REPORTE", fontNegrita));
 
-            // Crear tabla para el reporte
-            PdfPTable pdfTable = new PdfPTable(reportesTable.getColumnCount());
-            pdfTable.setWidthPercentage(100);
+            PdfPTable tabla = new PdfPTable(reportesTable.getColumnCount());
+            tabla.setWidthPercentage(100);
+            tabla.setSpacingBefore(10f);
+            tabla.setSpacingAfter(10f);
 
-            // Agregar encabezados
-            Font fontHeader = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
+            // Ajustar anchos de columnas si es necesario
+            float[] columnWidths = new float[reportesTable.getColumnCount()];
             for (int i = 0; i < reportesTable.getColumnCount(); i++) {
-                PdfPCell cell = new PdfPCell(new Phrase(reportesTable.getColumnName(i), fontHeader));
-                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-                cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                columnWidths[i] = 1f; // Todas las columnas con el mismo ancho por defecto
+            }
+            tabla.setWidths(columnWidths);
+
+            // Encabezados de la tabla
+            for (int i = 0; i < reportesTable.getColumnCount(); i++) {
+                PdfPCell cell = new PdfPCell(new Phrase(reportesTable.getColumnName(i), fontNegrita));
+                cell.setBackgroundColor(new BaseColor(220, 220, 220));
                 cell.setPadding(5);
-                pdfTable.addCell(cell);
+                tabla.addCell(cell);
             }
 
-            // Agregar datos
+            // Agregar datos a la tabla
             for (int row = 0; row < reportesTable.getRowCount(); row++) {
                 for (int col = 0; col < reportesTable.getColumnCount(); col++) {
                     Object value = reportesTable.getValueAt(row, col);
                     String texto = (value != null) ? value.toString() : "";
-                    PdfPCell cell = new PdfPCell(new Phrase(texto, fontNormal));
-                    cell.setPadding(5);
-                    pdfTable.addCell(cell);
+                    tabla.addCell(new Phrase(texto, fontNormal));
                 }
             }
 
-            documento.add(pdfTable);
+            documento.add(tabla);
 
-            // Agregar información adicional
-            Paragraph infoAdicional = new Paragraph("\nEste reporte fue generado automáticamente por el Sistema de Reportes de Ferretería.",
-                    new Font(Font.FontFamily.HELVETICA, 10, Font.ITALIC));
-            infoAdicional.setSpacingBefore(10);
+            // Si es posible, agregar resumen o estadísticas
+            if (reportesTable.getRowCount() > 0) {
+                Paragraph resumen = new Paragraph();
+                addEmptyLine(resumen, 1);
+
+                PdfPTable tablaTotales = new PdfPTable(2);
+                tablaTotales.setWidthPercentage(40);
+                tablaTotales.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                tablaTotales.setSpacingBefore(10f);
+
+                tablaTotales.addCell(new Phrase("Total de registros:", fontNegrita));
+                tablaTotales.addCell(new Phrase(String.valueOf(reportesTable.getRowCount()), fontNormal));
+
+                // Agregar más estadísticas según el tipo de reporte
+                if (tipoReporte.contains("Ventas")) {
+                    double totalVentas = 0;
+                    int totalOrdenes = 0;
+                    for (int row = 0; row < reportesTable.getRowCount(); row++) {
+                        String ventasStr = ((String) reportesTable.getValueAt(row, 1)).replace("$", "").replace(",", "");
+                        totalVentas += Double.parseDouble(ventasStr);
+                        totalOrdenes += (Integer) reportesTable.getValueAt(row, 2);
+                    }
+
+                    tablaTotales.addCell(new Phrase("Total ventas:", fontNegrita));
+                    tablaTotales.addCell(new Phrase(String.format("$%.2f", totalVentas), fontNormal));
+
+                    tablaTotales.addCell(new Phrase("Total órdenes:", fontNegrita));
+                    tablaTotales.addCell(new Phrase(String.valueOf(totalOrdenes), fontNormal));
+                }
+
+                documento.add(tablaTotales);
+            }
+
+            // Información adicional
+            Paragraph infoAdicional = new Paragraph();
+            addEmptyLine(infoAdicional, 2);
+            infoAdicional.add(new Paragraph("INFORMACIÓN ADICIONAL", fontNegrita));
+            infoAdicional.add(new Paragraph("Reporte generado el: " + sdf.format(new Date()), fontNormal));
             documento.add(infoAdicional);
+
+            // Notas y condiciones
+            Paragraph notas = new Paragraph();
+            addEmptyLine(notas, 2);
+            notas.add(new Paragraph("NOTAS Y CONDICIONES", fontNegrita));
+            notas.add(new Paragraph("- Este documento es para uso interno de la empresa.", fontPequeña));
+            notas.add(new Paragraph("- La información contenida es confidencial.", fontPequeña));
+            notas.add(new Paragraph("- Prohibida su reproducción sin autorización.", fontPequeña));
+            documento.add(notas);
+
+            // Pie de página
+            Paragraph footer = new Paragraph();
+            addEmptyLine(footer, 2);
+            footer.add(new Paragraph("Sistema de Reportes - Ferretería Future Soft", fontNormal));
+            footer.setAlignment(Element.ALIGN_CENTER);
+            documento.add(footer);
 
             // Cerrar el documento
             documento.close();
 
             JOptionPane.showMessageDialog(null,
-                    "Reporte exportado exitosamente a:\n" + rutaArchivo,
+                    "Factura de reporte generada correctamente.\nGuardada en: " + rutaArchivo,
                     "Exportación Exitosa", JOptionPane.INFORMATION_MESSAGE);
 
+            // Abrir el archivo automáticamente
+            try {
+                File pdfFile = new File(rutaArchivo);
+                if (pdfFile.exists()) {
+                    if (Desktop.isDesktopSupported()) {
+                        Desktop.getDesktop().open(pdfFile);
+                    } else {
+                        JOptionPane.showMessageDialog(null,
+                                "No se puede abrir automáticamente. El archivo está en: " + rutaArchivo);
+                    }
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Error al abrir el archivo: " + ex.getMessage());
+            }
         } catch (DocumentException | IOException e) {
             JOptionPane.showMessageDialog(null,
-                    "Error al exportar el reporte a PDF: " + e.getMessage(),
+                    "Error al generar la factura: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Método para exportar el reporte actual a PDF (método adicional que se puede usar como alternativa).
+     * Este método es más simple y llama al método generarFacturaPDF.
+     *
+     * @param tipoReporte Tipo de reporte que se está exportando
+     * @param nombreEmpleado Nombre del empleado que genera el reporte
+     */
+    public void exportarReporteActualAPDF(String tipoReporte, String nombreEmpleado) {
+        generarFacturaPDF(tipoReporte, nombreEmpleado);
+    }
+
+    /**
+     * Añade líneas en blanco a un párrafo.
+     * @param paragraph El párrafo al que añadir líneas
+     * @param number Número de líneas a añadir
+     */
+    private void addEmptyLine(Paragraph paragraph, int number) {
+        for (int i = 0; i < number; i++) {
+            paragraph.add(new Paragraph(" "));
         }
     }
 }
