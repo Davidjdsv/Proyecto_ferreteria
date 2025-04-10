@@ -15,7 +15,7 @@ import java.net.Socket;
 import static javax.swing.JOptionPane.*;
 
 public class ServidorGUI {
-    JPanel main;
+    public JPanel main;
     private JTextArea textArea1;
     private JButton enviarButton;
     private JTextField textField1;

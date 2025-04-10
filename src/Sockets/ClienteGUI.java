@@ -80,7 +80,7 @@ public class ClienteGUI {
                     actualizarTextArea("Servidor ha cerrado la conexión.\n");
                     break;
                 }
-                actualizarTextArea("Servidor dice: " + receivedMessage + "\n");
+                actualizarTextArea("Servidor: " + receivedMessage + "\n");
             }
         } catch (IOException e) {
             actualizarTextArea("Error al recibir mensajes: " + e.getMessage() + "\n");

@@ -447,17 +447,6 @@ public class ReportesGUI extends JFrame {
             }
         });
 
-        salirButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int opcion = JOptionPane.showConfirmDialog(ReportesGUI.this,
-                        "¿Está seguro de que desea salir?",
-                        "Confirmar salida", JOptionPane.YES_NO_OPTION);
-                if (opcion == JOptionPane.YES_OPTION) {
-                    System.exit(0);
-                }
-            }
-        });
     }
 
     /**
