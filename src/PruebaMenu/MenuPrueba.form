@@ -13,7 +13,7 @@
     </properties>
     <border type="none"/>
     <children>
-      <grid id="a45d5" binding="menuPanel" layout-manager="GridLayoutManager" row-count="11" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="10">
+      <grid id="a45d5" binding="menuPanel" layout-manager="GridLayoutManager" row-count="12" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="10">
         <margin top="15" left="10" bottom="15" right="0"/>
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false">
@@ -118,7 +118,7 @@
           </component>
           <vspacer id="73fc1">
             <constraints>
-              <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+              <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
             </constraints>
           </vspacer>
           <vspacer id="19b03">
@@ -168,6 +168,18 @@
               <foreground color="-458761"/>
               <horizontalAlignment value="2"/>
               <text value="Chat"/>
+            </properties>
+          </component>
+          <component id="e33dd" class="javax.swing.JButton" binding="salirButton" default-binding="true">
+            <constraints>
+              <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <background color="-7664379"/>
+              <font name="JetBrains Mono"/>
+              <foreground color="-458761"/>
+              <horizontalAlignment value="2"/>
+              <text value="Salir"/>
             </properties>
           </component>
         </children>
